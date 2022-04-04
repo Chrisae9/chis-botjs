@@ -7,38 +7,35 @@ import { changeStatus } from "./utils";
 
 // Environment Vars
 dotenv.config();
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID;
-const accessRole = process.env.ROLE_ID;
-const develop = process.env.DEVELOP;
+const token = process.env.DISCORD_TOKEN!;
+const clientId = process.env.CLIENT_ID!;
+const guildId = process.env.GUILD_ID!;
+const accessRole = process.env.ROLE_ID!;
+const develop = process.env.DEVELOP!;
 
 // Load Commands
 const commands = [];
-const commandFiles = fs
-  .readdirSync(`${__dirname}/commands`)
-  .filter((file) => file.endsWith(".js"));
+const commandFiles = fs.readdirSync(`${__dirname}/commands`);
 
 for (const file of commandFiles) {
   const command = require(`${__dirname}/commands/${file}`);
-  if (command.stable || parseInt(develop!))
-    commands.push(command.data.toJSON());
+  if (command.stable || parseInt(develop)) commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: "9" }).setToken(token!);
+const rest = new REST({ version: "9" }).setToken(token);
 
 (async () => {
   try {
     console.log("Started refreshing application (/) commands.");
 
-    if (parseInt(develop!)) {
+    if (parseInt(develop)) {
       // Guild Commands (testing)
-      await rest.put(Routes.applicationGuildCommands(clientId!, guildId!), {
+      await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
         body: commands,
       });
     } else {
       // Application Commands (production)
-      await rest.put(Routes.applicationCommands(clientId!), {
+      await rest.put(Routes.applicationCommands(clientId), {
         body: commands,
       });
     }
@@ -85,7 +82,6 @@ client.on("ready", async () => {
 // Interaction Event Listener
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
-
   if (commandFiles.includes(`${interaction.commandName}.js`)) {
     require(`./commands/${interaction.commandName}.js`).run(interaction);
   }

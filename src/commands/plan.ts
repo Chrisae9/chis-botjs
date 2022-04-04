@@ -1,12 +1,12 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { Database } = require("../database");
-const { embed } = require("../utils");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { Database } from "../database";
+import { embed } from "../utils";
 
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName("plan")
   .setDescription("Create a plan (This will overwrite any existing plans)")
   .addStringOption((option) =>
@@ -23,7 +23,7 @@ const data = new SlashCommandBuilder()
   );
 
 // On Interaction Event
-async function run(interaction) {
+export async function run(interaction: CommandInteraction) {
   const user = interaction.user;
   const title =
     interaction.options.getString("title") ||
@@ -31,13 +31,13 @@ async function run(interaction) {
   const spots = interaction.options.getInteger("spots") || 10;
 
   // Establish Connection To Database
-  const data = new Database(interaction.guild.id);
+  const data = new Database(interaction.guild!.id);
 
   // Delete Previous Message
   data.read().then(async (plan) => {
     if (plan)
-      interaction.guild.channels
-        .fetch(plan.channelId)
+      interaction
+        .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
           channel.messages
             .fetch(plan.messageId)
@@ -67,7 +67,3 @@ async function run(interaction) {
     });
   });
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;

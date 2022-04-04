@@ -1,18 +1,18 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { Database } = require("../database");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { Database } from "../database";
 
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName("gather")
   .setDescription("Mention all participants");
 
 // On Interaction Event
-async function run(interaction) {
+export async function run(interaction: CommandInteraction) {
   // Establish Connection To Database
-  const data = new Database(interaction.guild.id);
+  const data = new Database(interaction.guild!.id);
 
   // Get Participants
   data.read().then(async (plan) => {
@@ -28,12 +28,12 @@ async function run(interaction) {
           ],
           ephemeral: true,
         });
-        return
+        return;
       }
-      
-      mention = plan.participants
-      .map((participant, x) => `<@!${participant}>`)
-      .join(` `);
+
+      const mention = plan.participants
+        .map((participant: string, x: number) => `<@!${participant}>`)
+        .join(` `);
 
       // Send Message
       await interaction.reply({
@@ -60,7 +60,3 @@ async function run(interaction) {
     }
   });
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;

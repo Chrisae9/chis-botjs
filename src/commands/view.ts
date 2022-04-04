@@ -1,34 +1,26 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { Database } = require("../database");
-const { embed } = require("../utils");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { Database } from "../database";
+import { embed } from "../utils";
 
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
-  .setName("leave")
-  .setDescription("Leave the plan")
-  .addUserOption((option) =>
-    option
-      .setName("member")
-      .setDescription("The member to remove")
-      .setRequired(false)
-  );
+export const data = new SlashCommandBuilder()
+  .setName("view")
+  .setDescription("View the plan");
 
 // On Interaction Event
-async function run(interaction) {
-  const user = interaction.options.getUser("member") || interaction.user;
-
+async function run(interaction: CommandInteraction) {
   // Establish Connection To Database
-  const data = new Database(interaction.guild.id);
+  const data = new Database(interaction.guild!.id);
 
   // Join Plan
-  data.leave(user.id).then(async (plan) => {
+  data.read().then(async (plan) => {
     if (plan) {
       // Delete Previous Message
-      interaction.guild.channels
-        .fetch(plan.channelId)
+      interaction
+        .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
           channel.messages
             .fetch(plan.messageId)
@@ -61,14 +53,10 @@ async function run(interaction) {
           new MessageEmbed()
             .setColor("RED")
             .setTitle(":warning: Warning")
-            .setDescription("Unable to leave the current plan."),
+            .setDescription("Plan not created."),
         ],
         ephemeral: true,
       });
     }
   });
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;

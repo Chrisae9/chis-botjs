@@ -1,13 +1,13 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { exec } = require("child_process");
-const { changeStatus } = require("../utils");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { exec } from "child_process";
+import { changeStatus } from "../utils";
 
 // Production Ready flag
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName("server")
   .setDescription("Start/stop a service on [server.chis.dev]")
   .setDefaultPermission(false)
@@ -31,7 +31,7 @@ const data = new SlashCommandBuilder()
   );
 
 // Embedded Message Reply
-function embed(service, state) {
+function embed(service: string, state: string) {
   return new MessageEmbed()
     .setColor("#FFC0CB")
     .setTitle("Game Servers")
@@ -54,7 +54,7 @@ function embed(service, state) {
 }
 
 // On Interaction Event
-async function run(interaction) {
+export async function run(interaction: CommandInteraction) {
   const state = interaction.options.getString("state");
   const service = interaction.options.getString("service");
 
@@ -68,7 +68,7 @@ async function run(interaction) {
       console.log(`stderr: ${stderr}`);
       return;
     }
-    output = stdout;
+    const output = stdout;
     console.log(`stdout: ${stdout}`);
   });
   await interaction.reply({
@@ -79,7 +79,3 @@ async function run(interaction) {
   // Check Status of Services
   await changeStatus(interaction.client);
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;

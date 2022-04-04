@@ -1,15 +1,15 @@
-const Sequelize = require("sequelize");
-const dotenv = require("dotenv");
-
+import { Sequelize, DataTypes } from "sequelize";
+import dotenv from "dotenv";
 // Environment Vars
 dotenv.config();
-const db = process.env.DATABASE;
-const user = process.env.POSTGRES_USER;
-const pass = process.env.POSTGRES_PASSWORD;
-const host = process.env.POSTGRES_HOST;
-const develop = process.env.DEVELOP;
+const db = process.env.DATABASE!;
+const user = process.env.POSTGRES_USER!;
+const pass = process.env.POSTGRES_PASSWORD!;
+const host = process.env.POSTGRES_HOST!;
+const develop = process.env.DEVELOP!;
 
 // Configure Database
+
 const sequelize = new Sequelize(db, user, pass, {
   host: host,
   dialect: "postgres",
@@ -18,49 +18,50 @@ const sequelize = new Sequelize(db, user, pass, {
 // Construct Model
 const Plan = sequelize.define("plan", {
   id: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     unique: true,
     allowNull: false,
     primaryKey: true,
   },
   title: {
-    type: Sequelize.TEXT,
+    type: DataTypes.TEXT,
     defaultValue: ":notebook_with_decorative_cover: Game Plan",
     allowNull: false,
   },
   spots: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     defaultValue: 10,
     allowNull: false,
   },
   participants: {
-    type: Sequelize.ARRAY(Sequelize.TEXT),
+    type: DataTypes.ARRAY(DataTypes.TEXT),
     defaultValue: [],
     allowNull: false,
   },
-  messageId: Sequelize.TEXT,
-  channelId: Sequelize.TEXT,
+  messageId: DataTypes.TEXT,
+  channelId: DataTypes.TEXT,
 });
 
 // CRUD
-class Database {
-  constructor(guildId) {
+export class Database {
+  guildId: any;
+  constructor(guildId: any) {
     this.guildId = guildId;
   }
-  async create(user,title, spots) {
+  async create(user: string, title: string, spots: number) {
     await this.delete();
     return await Plan.create({
       id: this.guildId,
       title: title,
       spots: spots,
-      participants: [user]
+      participants: [user],
     });
   }
   async read() {
     return await Plan.findByPk(this.guildId);
   }
 
-  async update(plan) {
+  async update(plan: { save: () => any }) {
     return await plan.save();
   }
 
@@ -69,9 +70,9 @@ class Database {
     if (plan) await plan.destroy();
   }
 
-  async join(user) {
+  async join(user: any) {
     var plan = await this.read();
-    if (!plan) return await this.create(user);
+    if (!plan) return await this.create(user, undefined, undefined);
 
     const participants = Object.assign([], plan.participants);
     const spots = plan.spots;
@@ -84,7 +85,7 @@ class Database {
     return await this.update(plan);
   }
 
-  async leave(user) {
+  async leave(user: any) {
     const plan = await this.read();
     if (!plan) return;
 
@@ -92,11 +93,11 @@ class Database {
 
     if (!participants.includes(user)) return;
 
-    plan.participants = participants.filter((u) => u != user);
+    plan.participants = participants.filter((u: any) => u != user);
     return await this.update(plan);
   }
 
-  async rename(title) {
+  async rename(title: any) {
     const plan = await this.read();
     if (!plan) return;
 
@@ -105,7 +106,7 @@ class Database {
     return await this.update(plan);
   }
 
-  async lastMessage(channelId, messageId) {
+  async lastMessage(channelId: any, messageId: any) {
     const plan = await this.read();
     if (!plan) return;
 
@@ -115,8 +116,6 @@ class Database {
     return await this.update(plan);
   }
 }
-
-
 
 (async () => {
   try {

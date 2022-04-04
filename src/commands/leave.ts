@@ -1,34 +1,34 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { Database } = require("../database");
-const { embed } = require("../utils");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { Database } from "../database";
+import { embed } from "../utils";
 
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
-  .setName("rename")
-  .setDescription("Rename the plan")
-  .addStringOption((option) =>
+export const data = new SlashCommandBuilder()
+  .setName("leave")
+  .setDescription("Leave the plan")
+  .addUserOption((option) =>
     option
-      .setName("title")
-      .setDescription("The new title")
-      .setRequired(true)
+      .setName("member")
+      .setDescription("The member to remove")
+      .setRequired(false)
   );
 
 // On Interaction Event
-async function run(interaction) {
-  const title = interaction.options.getString("title");
+export async function run(interaction: CommandInteraction) {
+  const user = interaction.options.getUser("member") || interaction.user;
 
   // Establish Connection To Database
-  const data = new Database(interaction.guild.id);
+  const data = new Database(interaction.guild!.id);
 
-  // Rename Plan
-  data.rename(title).then(async (plan) => {
-    if (title.length) {
+  // Join Plan
+  data.leave(user.id).then(async (plan) => {
+    if (plan) {
       // Delete Previous Message
-      interaction.guild.channels
-        .fetch(plan.channelId)
+      interaction
+        .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
           channel.messages
             .fetch(plan.messageId)
@@ -61,14 +61,10 @@ async function run(interaction) {
           new MessageEmbed()
             .setColor("RED")
             .setTitle(":warning: Warning")
-            .setDescription("Please provide a valid title."),
+            .setDescription("Unable to leave the current plan."),
         ],
         ephemeral: true,
       });
     }
   });
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;

@@ -1,19 +1,19 @@
-const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
-const fs = require("node:fs");
-const dotenv = require("dotenv");
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
+import fs from "node:fs";
+import dotenv from "dotenv";
 
 // Environment Vars
 dotenv.config();
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID;
+const token = process.env.DISCORD_TOKEN!;
+const clientId = process.env.CLIENT_ID!;
+const guildId = process.env.GUILD_ID!;
 
 // Rest API
 const rest = new REST({ version: "9" }).setToken(token);
 
 // Command Files
-const commands = [];
+const commands: string[] = [];
 const commandFiles = fs
   .readdirSync(`${__dirname}/commands`)
   .filter((file) => file.endsWith(".js"));

@@ -1,12 +1,12 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
-const { Database } = require("../database");
-const { embed } = require("../utils");
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageEmbed, CommandInteraction } from "discord.js";
+import { Database } from "../database";
+import { embed } from "../utils";
 
-const stable = true;
+export const stable = true;
 
 // Slash Command
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName("join")
   .setDescription("Join the plan")
   .addUserOption((option) =>
@@ -17,20 +17,20 @@ const data = new SlashCommandBuilder()
   );
 
 // On Interaction Event
-async function run(interaction) {
+export async function run(interaction: CommandInteraction) {
   const user = interaction.options.getUser("member") || interaction.user;
 
   // Establish Connection To Database
-  const data = new Database(interaction.guild.id);
+  const data = new Database(interaction.guild!.id);
 
   // Join Plan
   data.join(user.id).then(async (plan) => {
     if (plan) {
       // Delete Previous Message
-      interaction.guild.channels
-        .fetch(plan.channelId)
+      interaction
+        .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
-          channel.messages
+          channel!.messages
             .fetch(plan.messageId)
             .then(async (message) => {
               await message.delete();
@@ -68,7 +68,3 @@ async function run(interaction) {
     }
   });
 }
-
-exports.stable = stable;
-exports.data = data;
-exports.run = run;
