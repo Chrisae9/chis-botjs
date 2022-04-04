@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,5 +25,8 @@
     "dotenv": "^16.0.0",
     "pg": "^8.7.3",
     "sequelize": "^6.17.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.3"
   }
 }

@@ -1,9 +1,9 @@
-const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
-const { Client, Intents } = require("discord.js");
-const fs = require("node:fs");
-const dotenv = require("dotenv");
-const { changeStatus } = require("./utils");
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
+import { Client, Intents } from "discord.js";
+import fs from "node:fs";
+import dotenv from "dotenv";
+import { changeStatus } from "./utils";
 
 // Environment Vars
 dotenv.config();
@@ -21,23 +21,24 @@ const commandFiles = fs
 
 for (const file of commandFiles) {
   const command = require(`${__dirname}/commands/${file}`);
-  if (command.stable || parseInt(develop)) commands.push(command.data.toJSON());
+  if (command.stable || parseInt(develop!))
+    commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: "9" }).setToken(token);
+const rest = new REST({ version: "9" }).setToken(token!);
 
 (async () => {
   try {
     console.log("Started refreshing application (/) commands.");
 
-    if (parseInt(develop)) {
+    if (parseInt(develop!)) {
       // Guild Commands (testing)
-      await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+      await rest.put(Routes.applicationGuildCommands(clientId!, guildId!), {
         body: commands,
       });
     } else {
       // Application Commands (production)
-      await rest.put(Routes.applicationCommands(clientId), {
+      await rest.put(Routes.applicationCommands(clientId!), {
         body: commands,
       });
     }
@@ -53,7 +54,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 // Log into Discord
 client.on("ready", async () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`Logged in as ${client.user?.tag}!`);
 
   // Initial Running Service Check
   await changeStatus(client);
@@ -62,10 +63,10 @@ client.on("ready", async () => {
   if (!client.application?.owner) await client.application?.fetch();
 
   // Set Role For Server Command
-  client.application.commands.fetch().then(async (commands) => {
+  client.application?.commands.fetch().then(async (commands) => {
     commands.forEach(async (command) => {
       if (command.name == "server") {
-        await client.application.commands.permissions.set({
+        await client.application?.commands.permissions.set({
           guild: guildId,
           command: command.id,
           permissions: [
