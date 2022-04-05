@@ -1,6 +1,7 @@
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, DataTypes, Model } from "sequelize";
 import dotenv from "dotenv";
-// Environment Vars
+
+// Database Environment Vars
 dotenv.config();
 const db = process.env.DATABASE!;
 const user = process.env.POSTGRES_USER!;
@@ -9,38 +10,53 @@ const host = process.env.POSTGRES_HOST!;
 const develop = process.env.DEVELOP!;
 
 // Configure Database
-
 const sequelize = new Sequelize(db, user, pass, {
   host: host,
   dialect: "postgres",
 });
 
 // Construct Model
-const Plan = sequelize.define("plan", {
-  id: {
-    type: DataTypes.STRING,
-    unique: true,
-    allowNull: false,
-    primaryKey: true,
+class Plan extends Model {
+  declare id: number;
+  declare title: string;
+  declare spots: number;
+  declare participants: string[];
+  declare messageId: string;
+  declare channelId: string;
+}
+
+// Initialize Plan
+Plan.init(
+  {
+    id: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+      primaryKey: true,
+    },
+    title: {
+      type: DataTypes.TEXT,
+      defaultValue: ":notebook_with_decorative_cover: Game Plan",
+      allowNull: false,
+    },
+    spots: {
+      type: DataTypes.INTEGER,
+      defaultValue: 10,
+      allowNull: false,
+    },
+    participants: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      defaultValue: [],
+      allowNull: false,
+    },
+    messageId: DataTypes.TEXT,
+    channelId: DataTypes.TEXT,
   },
-  title: {
-    type: DataTypes.TEXT,
-    defaultValue: ":notebook_with_decorative_cover: Game Plan",
-    allowNull: false,
-  },
-  spots: {
-    type: DataTypes.INTEGER,
-    defaultValue: 10,
-    allowNull: false,
-  },
-  participants: {
-    type: DataTypes.ARRAY(DataTypes.TEXT),
-    defaultValue: [],
-    allowNull: false,
-  },
-  messageId: DataTypes.TEXT,
-  channelId: DataTypes.TEXT,
-});
+  {
+    tableName: "plan",
+    sequelize, // passing the `sequelize` instance is required
+  }
+);
 
 // CRUD
 export class Database {
@@ -48,7 +64,7 @@ export class Database {
   constructor(guildId: any) {
     this.guildId = guildId;
   }
-  async create(user: string, title: string, spots: number) {
+  async create(user: string, title?: string, spots?: number) {
     await this.delete();
     return await Plan.create({
       id: this.guildId,
@@ -72,7 +88,7 @@ export class Database {
 
   async join(user: any) {
     var plan = await this.read();
-    if (!plan) return await this.create(user, undefined, undefined);
+    if (!plan) return await this.create(user);
 
     const participants = Object.assign([], plan.participants);
     const spots = plan.spots;
@@ -134,5 +150,3 @@ export class Database {
     console.error("Unable to connect to the database:", error);
   }
 })();
-
-exports.Database = Database;

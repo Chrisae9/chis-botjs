@@ -14,9 +14,7 @@ const rest = new REST({ version: "9" }).setToken(token);
 
 // Command Files
 const commands: string[] = [];
-const commandFiles = fs
-  .readdirSync(`${__dirname}/commands`)
-  .filter((file) => file.endsWith(".js"));
+const commandFiles = fs.readdirSync(`${__dirname}/commands`);
 
 // Load Commands
 async function loadApplicationCommands() {
@@ -31,10 +29,10 @@ async function loadApplicationCommands() {
     console.log("Started refreshing application (/) commands.");
 
     // Global Application Commands Delete
-    rest.get(Routes.applicationCommands(clientId)).then((data) => {
+    rest.get(Routes.applicationCommands(clientId)).then((data: any) => {
       const promises = [];
       for (const command of data) {
-        const deleteUrl = `${Routes.applicationCommands(clientId)}/${
+        const deleteUrl: any = `${Routes.applicationCommands(clientId)}/${
           command.id
         }`;
         promises.push(rest.delete(deleteUrl));
