@@ -39,6 +39,8 @@ export async function run(interaction: CommandInteraction) {
       interaction
         .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
+          if (channel === null || !channel.isText()) return;
+
           channel.messages
             .fetch(plan.messageId)
             .then(async (message) => {

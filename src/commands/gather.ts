@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { CommandInteraction, Message, MessageEmbed } from "discord.js";
 import { Database } from "../database";
 
 export const stable = true;
@@ -43,7 +43,10 @@ export async function run(interaction: CommandInteraction) {
 
       // Save Last Message
       interaction.fetchReply().then(async (message) => {
-        console.log(message);
+        if (!("channelId" in message)) {
+          return;
+        }
+
         await data.lastMessage(message.channelId, message.id);
       });
     } else {

@@ -30,6 +30,8 @@ export async function run(interaction: CommandInteraction) {
       interaction
         .guild!.channels.fetch(plan.channelId)
         .then(async (channel) => {
+          if (channel === null || !channel.isText()) return;
+
           channel.messages
             .fetch(plan.messageId)
             .then(async (message) => {
@@ -51,7 +53,8 @@ export async function run(interaction: CommandInteraction) {
 
       // Save Last Message
       interaction.fetchReply().then(async (message) => {
-        console.log(message);
+        if (!("channelId" in message)) return;
+
         await data.lastMessage(message.channelId, message.id);
       });
     } else {

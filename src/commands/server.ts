@@ -55,8 +55,8 @@ function embed(service: string, state: string) {
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
-  const state = interaction.options.getString("state");
-  const service = interaction.options.getString("service");
+  const state = interaction.options.getString("state")!;
+  const service = interaction.options.getString("service")!;
 
   // Docker Command
   exec(`docker ${state} ${service}`, (error, stdout, stderr) => {
