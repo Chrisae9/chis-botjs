@@ -9,4 +9,5 @@ RUN npm install
 
 COPY . /bot
 
-ENTRYPOINT ["node", "src/bot.js"]
+ENTRYPOINT ["npm", "run", "start"]
+
