@@ -10,6 +10,7 @@ services:
       - .env.prod
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./prod_logs:/bot/logs
     depends_on:
       - "database"
   database:
@@ -19,6 +20,6 @@ services:
     env_file:
       - .env.prod
     volumes:
-        - ./postgres:/docker-entrypoint-initdb.d
+      - ./postgres:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
