@@ -2,6 +2,7 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import fs from "node:fs";
 import dotenv from "dotenv";
+import { logger } from "./bot";
 
 // Environment Vars
 dotenv.config();
@@ -26,7 +27,7 @@ async function loadApplicationCommands() {
   }
 
   try {
-    console.log("Started refreshing application (/) commands.");
+    logger.info("Started refreshing application (/) commands.");
 
     // Global Application Commands Delete
     rest.get(Routes.applicationCommands(clientId)).then((data: any) => {
@@ -46,7 +47,7 @@ async function loadApplicationCommands() {
       });
     }
 
-    console.log("Successfully reloaded application (/) commands.");
+    logger.info("Successfully reloaded application (/) commands.");
   } catch (error) {
     console.error(error);
   }

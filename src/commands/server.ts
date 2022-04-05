@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { exec } from "child_process";
 import { changeStatus } from "../utils";
+import { logger } from "../bot";
 
 // Production Ready flag
 export const stable = true;
@@ -58,18 +59,22 @@ export async function run(interaction: CommandInteraction) {
   const state = interaction.options.getString("state")!;
   const service = interaction.options.getString("service")!;
 
+  logger.warn(
+    `${interaction.user.id}: ${interaction.user.username} is trying to ${state} ${service}.`
+  );
+
   // Docker Command
   exec(`docker ${state} ${service}`, (error, stdout, stderr) => {
     if (error) {
-      console.log(`error: ${error.message}`);
+      logger.error(`${error.message}`);
       return;
     }
     if (stderr) {
-      console.log(`stderr: ${stderr}`);
+      logger.info(`stderr: ${stderr}`);
       return;
     }
     const output = stdout;
-    console.log(`stdout: ${stdout}`);
+    logger.info(`stdout: ${stdout}`);
   });
   await interaction.reply({
     embeds: [embed(service, state)],

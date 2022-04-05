@@ -4,6 +4,7 @@ import { Client, Intents } from "discord.js";
 import fs from "node:fs";
 import dotenv from "dotenv";
 import { changeStatus } from "./utils";
+import { createLogger, transports, format } from "winston";
 
 // Environment Vars
 dotenv.config();
@@ -12,6 +13,39 @@ const clientId = process.env.CLIENT_ID!;
 const guildId = process.env.GUILD_ID!;
 const accessRole = process.env.ROLE_ID!;
 const develop = process.env.DEVELOP!;
+
+// logging
+export const logger = createLogger({
+  level: "info",
+  format: format.combine(
+    format.timestamp(),
+    format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level}: ${message}`;
+    })
+  ),
+  transports: [
+    new transports.File({
+      filename: "logs/error.log",
+      level: "error",
+    }),
+    new transports.File({
+      filename: "logs/warn.log",
+      level: "error",
+    }),
+    new transports.File({
+      filename: "logs/combined.log",
+    }),
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.timestamp(),
+        format.printf(({ timestamp, level, message }) => {
+          return `[${timestamp}] ${level}: ${message}`;
+        })
+      ),
+    }),
+  ],
+});
 
 // Load Commands
 const commands = [];
@@ -26,7 +60,7 @@ const rest = new REST({ version: "9" }).setToken(token);
 
 (async () => {
   try {
-    console.log("Started refreshing application (/) commands.");
+    logger.info("Started refreshing application (/) commands.");
 
     if (parseInt(develop)) {
       // Guild Commands (testing)
@@ -40,9 +74,9 @@ const rest = new REST({ version: "9" }).setToken(token);
       });
     }
 
-    console.log("Successfully reloaded application (/) commands.");
+    logger.info("Successfully reloaded application (/) commands.");
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 })();
 
@@ -51,7 +85,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 // Log into Discord
 client.on("ready", async () => {
-  console.log(`Logged in as ${client.user?.tag}!`);
+  logger.warn(`Logged in as ${client.user?.tag}!`);
 
   // Initial Running Service Check
   await changeStatus(client);
@@ -82,8 +116,12 @@ client.on("ready", async () => {
 // Interaction Event Listener
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
-  if (commandFiles.includes(`${interaction.commandName}.js`)) {
-    require(`./commands/${interaction.commandName}.js`).run(interaction);
+  logger.warn(
+    `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command}.`
+  );
+
+  if (commandFiles.includes(`${interaction.commandName}.ts`)) {
+    require(`./commands/${interaction.commandName}.ts`).run(interaction);
   }
 });
 

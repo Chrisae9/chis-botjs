@@ -1,6 +1,7 @@
 import { MessageEmbed } from "discord.js";
 import { exec } from "child_process";
 import { Client } from "discord.js";
+import { logger } from "./bot";
 
 export function embed(title: string, spots: number, participants: string[]) {
   var mention = "No one has joined the plan.";
@@ -34,6 +35,8 @@ export async function changeStatus(client: Client): Promise<void> {
   const delay = (ms: number | undefined) =>
     new Promise((res) => setTimeout(res, ms));
   await delay(11000);
+
+  logger.info("Updating client status.");
 
   exec(
     `docker ps --format "table {{.Names}}" | grep -w '${services.join("\\|")}'`,

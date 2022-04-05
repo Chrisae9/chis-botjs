@@ -1,5 +1,6 @@
 import { Sequelize, DataTypes, Model } from "sequelize";
 import dotenv from "dotenv";
+import { logger } from "./bot";
 
 // Database Environment Vars
 dotenv.config();
@@ -136,7 +137,7 @@ export class Database {
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
+    logger.info("Connection has been established successfully.");
 
     // Refresh Table (change to true to clear all data)
     if (parseInt(develop)) {
@@ -147,6 +148,6 @@ export class Database {
 
     // Add database test commands here
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    logger.error("Unable to connect to the database:", error);
   }
 })();
