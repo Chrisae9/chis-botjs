@@ -2,6 +2,7 @@ import { MessageEmbed } from "discord.js";
 import { exec } from "child_process";
 import { Client } from "discord.js";
 import { logger } from "./bot";
+import { services } from "./commands/server";
 
 export function embed(title: string, spots: number, participants: string[]) {
   var mention = "No one has joined the plan.";
@@ -27,8 +28,6 @@ export function embed(title: string, spots: number, participants: string[]) {
         "https://cdn.discordapp.com/avatars/219152343588012033/4c7053ce4c177cdab007d986c47b9410.webp?size=512",
     });
 }
-
-const services = ["7dtd", "valheim", "minecraft", "csgo"];
 
 export async function changeStatus(client: Client): Promise<void> {
   // Wait for Docker Service To Start/Stop

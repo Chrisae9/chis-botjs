@@ -7,6 +7,15 @@ import { logger } from "../bot";
 // Production Ready flag
 export const stable = true;
 
+// Services
+export const services = [
+  "7dtd",
+  "valheim",
+  "minecraft",
+  "csgo",
+  "satisfactory",
+];
+
 // Slash Command
 export const data = new SlashCommandBuilder()
   .setName("server")
@@ -21,6 +30,7 @@ export const data = new SlashCommandBuilder()
       .addChoice("Valheim (PW: jrisawesome)", "valheim")
       .addChoice("Minecraft", "minecraft")
       .addChoice("CS:GO Bhop", "csgo")
+      .addChoice("Satisfactory", "satisfactory")
   )
   .addStringOption((option) =>
     option
