@@ -5,6 +5,7 @@ import fs from "node:fs";
 import dotenv from "dotenv";
 import { changeStatus } from "./utils";
 import { createLogger, transports, format } from "winston";
+import moment from "moment";
 
 // Environment Vars
 dotenv.config();
@@ -18,7 +19,7 @@ const develop = process.env.DEVELOP!;
 export const logger = createLogger({
   level: "info",
   format: format.combine(
-    format.timestamp(),
+    format.timestamp({ format: moment().format("YYYY-MM-DD hh:mm:ss") }),
     format.printf(({ timestamp, level, message }) => {
       return `[${timestamp}] ${level}: ${message}`;
     })
@@ -30,20 +31,12 @@ export const logger = createLogger({
     }),
     new transports.File({
       filename: "logs/warn.log",
-      level: "error",
+      level: "warn",
     }),
     new transports.File({
       filename: "logs/combined.log",
     }),
-    new transports.Console({
-      format: format.combine(
-        format.colorize(),
-        format.timestamp(),
-        format.printf(({ timestamp, level, message }) => {
-          return `[${timestamp}] ${level}: ${message}`;
-        })
-      ),
-    }),
+    new transports.Console(),
   ],
 });
 

@@ -28,6 +28,7 @@
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
+    "moment": "^2.29.2",
     "pg": "^8.7.3",
     "sequelize": "^6.17.0",
     "winston": "^3.7.2"
