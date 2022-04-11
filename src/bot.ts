@@ -1,6 +1,6 @@
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
-import { Client, Intents } from "discord.js";
+import { Client, Intents, ButtonInteraction } from "discord.js";
 import fs from "node:fs";
 import dotenv from "dotenv";
 import { changeStatus } from "./utils";
@@ -43,11 +43,21 @@ export const logger = createLogger({
 
 // Load Commands
 const commands = [];
+const buttonHandlers: { [key: string]: (interaction: ButtonInteraction) => Promise<void> } = {};
 const commandFiles = fs.readdirSync(`${__dirname}/commands`);
 
 for (const file of commandFiles) {
   const command = require(`${__dirname}/commands/${file}`);
   if (command.stable || parseInt(develop)) commands.push(command.data.toJSON());
+    if ("buttons" in command) {
+	   for (const customId of Object.keys(command.buttons)) {
+		  if (customId in buttonHandlers) {
+			 throw new Error(`Discord button interaction handler for '${customId}' was already defined`);
+		  }
+		  
+		  buttonHandlers[customId] = command.buttons[customId];
+	   }
+    }
 }
 
 const rest = new REST({ version: "9" }).setToken(token);
@@ -136,6 +146,11 @@ client.on("interactionCreate", async (interaction) => {
 				}
 			 }
 		  }
+	   }
+    } else if (interaction.isButton()) {
+	   // Interaction is a button event
+	   if (interaction.customId in buttonHandlers) {
+		  await buttonHandlers[interaction.customId](interaction);
 	   }
     }
 });
