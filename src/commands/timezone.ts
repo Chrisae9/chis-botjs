@@ -74,7 +74,7 @@ export async function run(interaction: CommandInteraction) {
       statusEmbed({
         level: "success",
         title: "Timezone Saved",
-        message: `Your timezone has been set to \`${timezoneArg}\``,
+        message: `You will now see events in \`${timezoneArg}\` timezone.`,
       }),
     ],
     ephemeral: true,
