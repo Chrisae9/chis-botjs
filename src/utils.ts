@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { Guild, MessageEmbed } from "discord.js";
 import { exec } from "child_process";
 import { Client } from "discord.js";
 import { logger } from "./bot";
@@ -47,4 +47,23 @@ export async function changeStatus(client: Client): Promise<void> {
       }
     }
   );
+}
+
+// Check If Message Exists Helper Method
+export async function messageExists(
+  guild: Guild,
+  channelId: string,
+  messageId: string
+) {
+  if (!channelId || !messageId) return;
+
+  const channel = await guild.channels
+    .fetch(channelId)
+    .catch((error) => logger.error(error) && null);
+
+  if (channel === null || !channel.isText()) return;
+
+  return await channel.messages
+    .fetch(messageId)
+    .catch((error) => logger.error(error) && undefined);
 }
