@@ -84,6 +84,9 @@ client.on("ready", async () => {
   // Initial Running Service Check
   await changeStatus(client);
 
+  // Set Bot Activity
+  client.user?.setActivity("/plan & /server", { type: "LISTENING" });
+
   // Fetch Application
   if (!client.application?.owner) await client.application?.fetch();
 
@@ -109,13 +112,34 @@ client.on("ready", async () => {
 
 // Interaction Event Listener
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
-  logger.warn(
-    `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command}.`
-  );
+  // Interaction Command
+  if (interaction.isCommand()) {
+    logger.warn(
+      `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command}.`
+    );
 
-  if (commandFiles.includes(`${interaction.commandName}.ts`)) {
-    require(`./commands/${interaction.commandName}.ts`).run(interaction);
+    if (commandFiles.includes(`${interaction.commandName}.ts`)) {
+      require(`./commands/${interaction.commandName}.ts`).run(interaction);
+    }
+    // Interaction Button
+  } else if (interaction && interaction.isButton()) {
+    const messageInteraction = interaction.message.interaction;
+
+    if (
+      messageInteraction &&
+      "commandName" in messageInteraction &&
+      commandFiles.includes(`${messageInteraction.commandName}.ts`)
+    ) {
+      logger.warn(
+        `${interaction.user.id}: ${interaction.user.username} pressed the ${interaction.component.label} from the ${messageInteraction.commandName} command.`
+      );
+
+      const cmdMod = require(`./commands/${messageInteraction.commandName}.ts`);
+
+      if ("buttonResponse" in cmdMod) {
+        cmdMod.buttonResponse(interaction);
+      }
+    }
   }
 });
 
