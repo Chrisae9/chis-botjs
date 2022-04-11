@@ -21,7 +21,7 @@ var cacheMessage: { title: string; spots: number } | undefined = undefined;
 // Slash Command
 export const data = new SlashCommandBuilder()
   .setName("plan")
-  .setDescription("Create a plan (This will overwrite any existing plans)")
+  .setDescription("Create a plan")
   .addStringOption((option) =>
     option
       .setName("title")
