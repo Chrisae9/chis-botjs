@@ -1,9 +1,22 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
-import { Database } from "../database";
-import { embed } from "../utils";
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  Guild,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+} from "discord.js";
+import moment from "moment-timezone";
+import { logger } from "../bot";
+import { Database, Plan } from "../database";
+import { embed, messageExists } from "../utils";
 
 export const stable = true;
+
+const PLAN_PROTECTION_SECONDS = 60 * 60 * 1; // 1 hour
+
+var cacheMessage: { title: string; spots: number } | undefined = undefined;
 
 // Slash Command
 export const data = new SlashCommandBuilder()
@@ -24,49 +37,156 @@ export const data = new SlashCommandBuilder()
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
+  //Grab State
   const user = interaction.user;
-  const title =
-    interaction.options.getString("title") ||
-    ":notebook_with_decorative_cover: Game Plan";
-  const spots = interaction.options.getInteger("spots") || 10;
+  var title = interaction.options.getString("title");
+  if (!title || title.length > 256)
+    title = ":notebook_with_decorative_cover: Game Plan";
+  var spots = interaction.options.getInteger("spots") || 10;
+  if (spots > 20) {
+    spots = 20;
+  }
 
   // Establish Connection To Database
-  const data = new Database(interaction.guild!.id);
+  if (!interaction.guild) return;
+  const data = new Database(interaction.guild.id);
 
-  // Delete Previous Message
-  data.read().then(async (plan) => {
-    if (plan)
-      interaction
-        .guild!.channels.fetch(plan.channelId)
-        .then(async (channel) => {
-          if (channel === null || !channel.isText()) return;
+  // Read Plan
+  var plan = await data.read();
 
-          channel.messages
-            .fetch(plan.messageId)
-            .then(async (message) => {
-              await message.delete();
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        })
-        .catch((error) => {
-          console.error(error);
+  if (plan) {
+    // Send Previous Message Warning
+    const message = await messageExists(
+      interaction.guild,
+      plan.channelId,
+      plan.messageId
+    );
+    if (message) {
+      // Calculate Seconds Since Last Plan Activity
+      const now = moment();
+      const messageTime = moment(message.createdTimestamp);
+      const timeDifference = now.diff(messageTime, "seconds");
+
+      // Plan Protection
+      if (timeDifference < PLAN_PROTECTION_SECONDS) {
+        await interaction.reply({
+          embeds: [
+            embed(plan.title, plan.spots, plan.participants),
+            new MessageEmbed()
+              .setColor("YELLOW")
+              .setTitle(":warning: Plan Recently Used")
+              .setDescription(
+                "Would you like overwrite the existing plan shown above?"
+              ),
+          ],
+          components: [
+            new MessageActionRow().addComponents(
+              new MessageButton()
+                .setCustomId("yes")
+                .setLabel("Yes")
+                .setStyle("PRIMARY"),
+              new MessageButton()
+                .setCustomId("no")
+                .setLabel("No")
+                .setStyle("DANGER")
+            ),
+          ],
+          ephemeral: true,
         });
-  });
 
-  // Join Plan
-  data.create(user.id, title, spots).then(async (plan) => {
-    // Send Embed
-    await interaction.reply({
+        // Temporarily save data
+        cacheMessage = { title: title, spots: spots };
+
+        // Stop and don't create new plan. (Wait for button press)
+        return;
+      }
+    }
+  }
+
+  // Create Plan
+  plan = await data.create(user.id, title, spots);
+
+  // Send Plan Embed
+  await interaction
+    .reply({
       embeds: [embed(plan.title, plan.spots, plan.participants)],
       ephemeral: false,
-    });
+    })
+    .catch((error) => logger.error(error));
 
-    // Save Last Message
-    interaction.fetchReply().then(async (message) => {
-      if (!("channelId" in message)) return;
-      await data.lastMessage(message.channelId, message.id);
-    });
-  });
+  // Save Last Message Sent to Discord
+  const replyMessage = await interaction.fetchReply();
+
+  if (!("channelId" in replyMessage)) return;
+  await data.lastMessage(replyMessage.channelId, replyMessage.id);
+}
+
+export async function buttonResponse(interaction: ButtonInteraction) {
+  if (interaction.component.type == "BUTTON") {
+    //"No" Button Press
+    if (interaction.component.customId == "no") {
+      await interaction.update({
+        embeds: [
+          new MessageEmbed()
+            .setColor("BLUE")
+            .setTitle(":information_source:  Information")
+            .setDescription(
+              "To add yourself to the existing plan use `/join`."
+            ),
+        ],
+        components: [],
+      });
+    }
+
+    // "Yes" Button Press
+    if (interaction.component.customId == "yes") {
+      // Update Button Message
+      await interaction.update({
+        embeds: [
+          new MessageEmbed()
+            .setColor("BLUE")
+            .setTitle(":information_source: Information")
+            .setDescription("Plan overwritten, you can dismiss this message."),
+        ],
+        components: [],
+      });
+
+      // Establish Connection To Database
+      const data = new Database(interaction.guild!.id);
+
+      // Read Plan
+      var plan: void | Plan | null = await data.read();
+
+      // Delete Previous Message
+      if (!interaction.guild) return;
+
+      if (plan) {
+        const message = await messageExists(
+          interaction.guild,
+          plan.channelId,
+          plan.messageId
+        );
+
+        if (message) {
+          await message.delete().catch((error) => logger.error(error));
+        }
+
+        // Join Plan
+        plan = await data.create(
+          interaction.user.id,
+          cacheMessage?.title || ":notebook_with_decorative_cover: Game Plan",
+          cacheMessage?.spots || 10
+        );
+        // Send Embed
+        const followUpMessage = await interaction.followUp({
+          embeds: [embed(plan.title, plan.spots, plan.participants)],
+          ephemeral: false,
+        });
+
+        // Save Last Message
+        if (!("channelId" in followUpMessage)) return;
+        await data.lastMessage(followUpMessage.channelId, followUpMessage.id);
+      }
+    }
+  }
 }
