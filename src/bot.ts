@@ -112,17 +112,43 @@ client.on("ready", async () => {
 
 // Interaction Event Listener
 client.on("interactionCreate", async (interaction) => {
-  // Interaction Command
+  // Handle interaction
   if (interaction.isCommand()) {
+    // Interaction is a command
     logger.warn(
       `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command}.`
     );
 
     if (commandFiles.includes(`${interaction.commandName}.ts`)) {
-      require(`./commands/${interaction.commandName}.ts`).run(interaction);
+      await require(`./commands/${interaction.commandName}.ts`).run(
+        interaction
+      );
     }
-    // Interaction Button
+  } else if (interaction.isAutocomplete()) {
+    // Interaction is an autocomplete event
+    if (commandFiles.includes(`${interaction.commandName}.ts`)) {
+      const cmdMod = require(`./commands/${interaction.commandName}.ts`);
+
+      if ("autocomplete" in cmdMod) {
+        // Autocomplete is configured for this command
+        // Find the autocomplete handler for the specific option
+        for (const optionName of Object.keys(cmdMod.autocomplete)) {
+          // The autocomplete interaction will have a value for the option's name if the autocomplete is for that option
+          const autocompleteInput = interaction.options.getString(optionName);
+          if (autocompleteInput !== null) {
+            // This auto-complete event is for this option
+            await cmdMod.autocomplete[optionName](
+              interaction,
+              autocompleteInput
+            );
+          }
+        }
+      }
+    }
   } else if (interaction && interaction.isButton()) {
+    // Interaction is an button event
+
+    // Grab the message interaction from the button interaction
     const messageInteraction = interaction.message.interaction;
 
     if (
@@ -137,6 +163,7 @@ client.on("interactionCreate", async (interaction) => {
       const cmdMod = require(`./commands/${messageInteraction.commandName}.ts`);
 
       if ("buttonResponse" in cmdMod) {
+        // Buttons are configured for this command
         cmdMod.buttonResponse(interaction);
       }
     }
