@@ -17,8 +17,8 @@ const sequelize = new Sequelize(db, user, pass, {
 });
 
 // Construct Model
-class Plan extends Model {
-  declare id: number;
+export class Plan extends Model {
+  declare id: string;
   declare title: string;
   declare spots: number;
   declare participants: string[];
@@ -30,7 +30,7 @@ class Plan extends Model {
 Plan.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       unique: true,
       allowNull: false,
       primaryKey: true,
