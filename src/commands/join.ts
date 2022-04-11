@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed, CommandInteraction } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { logger } from "../bot";
 import { Database } from "../database";
-import { embed, messageExists } from "../utils";
+import { embed, messageExists, statusEmbed } from "../utils";
 
 export const stable = true;
 
@@ -11,10 +11,7 @@ export const data = new SlashCommandBuilder()
   .setName("join")
   .setDescription("Join the plan")
   .addUserOption((option) =>
-    option
-      .setName("member")
-      .setDescription("The member to add")
-      .setRequired(false)
+    option.setName("member").setDescription("The member to add").setRequired(false)
   );
 
 // On Interaction Event
@@ -30,11 +27,7 @@ export async function run(interaction: CommandInteraction) {
 
   if (plan) {
     // Delete Previous Message
-    const message = await messageExists(
-      interaction.guild,
-      plan.channelId,
-      plan.messageId
-    );
+    const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
 
     if (message) await message.delete().catch((error) => logger.error(error));
 
@@ -51,12 +44,7 @@ export async function run(interaction: CommandInteraction) {
   } else {
     // Send Error Embed
     await interaction.reply({
-      embeds: [
-        new MessageEmbed()
-          .setColor("RED")
-          .setTitle(":warning: Warning")
-          .setDescription("Unable to join the current plan."),
-      ],
+      embeds: [statusEmbed({ level: "error", message: "Unable to join the current plan." })],
       ephemeral: true,
     });
   }

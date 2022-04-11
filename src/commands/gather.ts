@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, Message, MessageEmbed } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { Database } from "../database";
+import { statusEmbed } from "../utils";
 
 export const stable = true;
 
@@ -22,10 +23,7 @@ export async function run(interaction: CommandInteraction) {
       // Send Missing player Embed
       await interaction.reply({
         embeds: [
-          new MessageEmbed()
-            .setColor("RED")
-            .setTitle(":warning: Warning")
-            .setDescription("Currently no participants to mention."),
+          statusEmbed({ level: "warning", message: "Currently no participants to mention." }),
         ],
         ephemeral: true,
       });
@@ -44,12 +42,7 @@ export async function run(interaction: CommandInteraction) {
   } else {
     // Send Error Embed
     await interaction.reply({
-      embeds: [
-        new MessageEmbed()
-          .setColor("RED")
-          .setTitle(":warning: Warning")
-          .setDescription("Plan not created."),
-      ],
+      embeds: [statusEmbed({ level: "error", message: "Plan not created." })],
       ephemeral: true,
     });
   }

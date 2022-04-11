@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { logger } from "../bot";
 import { Database } from "../database";
-import { embed, messageExists } from "../utils";
+import { embed, messageExists, statusEmbed } from "../utils";
 
 export const stable = true;
 
@@ -11,10 +11,7 @@ export const data = new SlashCommandBuilder()
   .setName("leave")
   .setDescription("Leave the plan")
   .addUserOption((option) =>
-    option
-      .setName("member")
-      .setDescription("The member to remove")
-      .setRequired(false)
+    option.setName("member").setDescription("The member to remove").setRequired(false)
   );
 
 // On Interaction Event
@@ -29,11 +26,7 @@ export async function run(interaction: CommandInteraction) {
   const plan = await data.leave(user.id);
   if (plan) {
     // Delete Previous Message
-    const message = await messageExists(
-      interaction.guild,
-      plan.channelId,
-      plan.messageId
-    );
+    const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
 
     if (message) await message.delete().catch((error) => logger.error(error));
 
@@ -50,12 +43,7 @@ export async function run(interaction: CommandInteraction) {
   } else {
     // Send Error Embed
     await interaction.reply({
-      embeds: [
-        new MessageEmbed()
-          .setColor("RED")
-          .setTitle(":warning: Warning")
-          .setDescription("Unable to leave the current plan."),
-      ],
+      embeds: [statusEmbed({ level: "error", message: "Unable to leave the current plan." })],
       ephemeral: true,
     });
   }

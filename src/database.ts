@@ -16,7 +16,7 @@ const sequelize = new Sequelize(db, user, pass, {
   dialect: "postgres",
 });
 
-// Construct Model
+// Construct Models
 export class Plan extends Model {
   declare id: string;
   declare title: string;
@@ -24,6 +24,26 @@ export class Plan extends Model {
   declare participants: string[];
   declare messageId: string;
   declare channelId: string;
+}
+
+/**
+ * Configures the timezone with which a user wishes to view times.
+ */
+export class UserTzConfig extends Model {
+  /**
+   * Unique identifier of timezone configuration entity.
+   */
+  declare id: number;
+
+  /**
+   * Discord ID of the user to which the timezone configuration pertains.
+   */
+  declare userId: string;
+
+  /**
+   * The timezone specifier string. Taken from MomentJS's list of timezones, which they say are sourced from: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+   */
+  declare timezone: string;
 }
 
 // Initialize Plan
@@ -55,6 +75,31 @@ Plan.init(
   },
   {
     tableName: "plan",
+    sequelize, // passing the `sequelize` instance is required
+  }
+);
+
+UserTzConfig.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      unique: true,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    userId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    timezone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    tableName: "user_tz_config",
     sequelize, // passing the `sequelize` instance is required
   }
 );
@@ -131,6 +176,36 @@ export class Database {
     plan.messageId = messageId;
 
     return await this.update(plan);
+  }
+
+  /**
+   * Update or create a user's timezone preference.
+   */
+  async saveUserTz(userId: string, timezone: string): Promise<void> {
+    const userTzConfig = await UserTzConfig.findOne({ where: { userId } });
+    if (userTzConfig === null) {
+      // No config entry present
+      UserTzConfig.create({
+        userId,
+        timezone,
+      });
+      return;
+    }
+
+    userTzConfig.timezone = timezone;
+    await userTzConfig.save();
+  }
+
+  /**
+   * @returns The stored timezone for the user or null if not set.
+   */
+  async getUserTz(userId: string): Promise<string | null> {
+    const userTzConfig = await UserTzConfig.findOne({ where: { userId } });
+    if (userTzConfig === null) {
+      return null;
+    }
+
+    return userTzConfig.timezone;
   }
 }
 

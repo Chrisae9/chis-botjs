@@ -29,10 +29,53 @@ export function embed(title: string, spots: number, participants: string[]) {
     });
 }
 
+/**
+ * @returns An embed setup to look like an error.
+ */
+export function statusEmbed({
+  level,
+  title,
+  message,
+}: {
+  level: "error" | "warning" | "info" | "success";
+  title?: string;
+  message: string;
+}) {
+  const color =
+    level === "error"
+      ? "RED"
+      : level === "warning"
+      ? "YELLOW"
+      : level === "info"
+      ? "BLUE"
+      : "GREEN";
+  const titleEmoji =
+    level === "error"
+      ? ":no_entry_sign:"
+      : level === "warning"
+      ? ":warning:"
+      : level === "info"
+      ? ":information_source:"
+      : ":white_check_mark:";
+  const titleBody =
+    title !== undefined
+      ? title
+      : level === "error"
+      ? "Error"
+      : level === "warning"
+      ? "Warning"
+      : level === "info"
+      ? "Information"
+      : "Success";
+  return new MessageEmbed()
+    .setColor(color)
+    .setTitle(`${titleEmoji} ${titleBody}`)
+    .setDescription(message);
+}
+
 export async function changeStatus(client: Client): Promise<void> {
   // Wait for Docker Service To Start/Stop
-  const delay = (ms: number | undefined) =>
-    new Promise((res) => setTimeout(res, ms));
+  const delay = (ms: number | undefined) => new Promise((res) => setTimeout(res, ms));
   await delay(11000);
 
   logger.info("Updating client status.");
@@ -50,11 +93,7 @@ export async function changeStatus(client: Client): Promise<void> {
 }
 
 // Check If Message Exists Helper Method
-export async function messageExists(
-  guild: Guild,
-  channelId: string,
-  messageId: string
-) {
+export async function messageExists(guild: Guild, channelId: string, messageId: string) {
   if (!channelId || !messageId) return;
 
   const channel = await guild.channels
@@ -63,7 +102,5 @@ export async function messageExists(
 
   if (channel === null || !channel.isText()) return;
 
-  return await channel.messages
-    .fetch(messageId)
-    .catch((error) => logger.error(error) && undefined);
+  return await channel.messages.fetch(messageId).catch((error) => logger.error(error) && undefined);
 }

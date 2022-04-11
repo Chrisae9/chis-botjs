@@ -2,14 +2,12 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { logger } from "../bot";
 import { Database } from "../database";
-import { embed, messageExists } from "../utils";
+import { embed, messageExists, statusEmbed } from "../utils";
 
 export const stable = true;
 
 // Slash Command
-export const data = new SlashCommandBuilder()
-  .setName("view")
-  .setDescription("View the plan");
+export const data = new SlashCommandBuilder().setName("view").setDescription("View the plan");
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
@@ -21,11 +19,7 @@ export async function run(interaction: CommandInteraction) {
   const plan = await data.read();
   if (plan) {
     // Delete Previous Message
-    const message = await messageExists(
-      interaction.guild,
-      plan.channelId,
-      plan.messageId
-    );
+    const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
 
     if (message) await message.delete().catch((error) => logger.error(error));
 
@@ -42,12 +36,7 @@ export async function run(interaction: CommandInteraction) {
   } else {
     // Send Error Embed
     await interaction.reply({
-      embeds: [
-        new MessageEmbed()
-          .setColor("RED")
-          .setTitle(":warning: Warning")
-          .setDescription("Plan not created."),
-      ],
+      embeds: [statusEmbed({ level: "error", message: "Plan not created." })],
       ephemeral: true,
     });
   }

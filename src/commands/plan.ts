@@ -10,7 +10,7 @@ import {
 import moment from "moment-timezone";
 import { logger } from "../bot";
 import { Database, Plan } from "../database";
-import { embed, messageExists } from "../utils";
+import { embed, messageExists, statusEmbed } from "../utils";
 
 export const stable = true;
 
@@ -23,16 +23,10 @@ export const data = new SlashCommandBuilder()
   .setName("plan")
   .setDescription("Create a plan")
   .addStringOption((option) =>
-    option
-      .setName("title")
-      .setDescription("The title of the plan")
-      .setRequired(false)
+    option.setName("title").setDescription("The title of the plan").setRequired(false)
   )
   .addIntegerOption((option) =>
-    option
-      .setName("spots")
-      .setDescription("The number of spots in the plan")
-      .setRequired(false)
+    option.setName("spots").setDescription("The number of spots in the plan").setRequired(false)
   );
 
 // On Interaction Event
@@ -40,8 +34,7 @@ export async function run(interaction: CommandInteraction) {
   //Grab State
   const user = interaction.user;
   var title = interaction.options.getString("title");
-  if (!title || title.length > 256)
-    title = ":notebook_with_decorative_cover: Game Plan";
+  if (!title || title.length > 256) title = ":notebook_with_decorative_cover: Game Plan";
   var spots = interaction.options.getInteger("spots") || 10;
   if (spots > 20) {
     spots = 20;
@@ -56,11 +49,7 @@ export async function run(interaction: CommandInteraction) {
 
   if (plan) {
     // Send Previous Message Warning
-    const message = await messageExists(
-      interaction.guild,
-      plan.channelId,
-      plan.messageId
-    );
+    const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
     if (message) {
       // Calculate Seconds Since Last Plan Activity
       const now = moment();
@@ -72,23 +61,15 @@ export async function run(interaction: CommandInteraction) {
         await interaction.reply({
           embeds: [
             embed(plan.title, plan.spots, plan.participants),
-            new MessageEmbed()
-              .setColor("YELLOW")
-              .setTitle(":warning: Plan Recently Used")
-              .setDescription(
-                "Would you like overwrite the existing plan shown above?"
-              ),
+            statusEmbed({
+              level: "warning",
+              message: "Would you like overwrite the existing plan shown above?",
+            }),
           ],
           components: [
             new MessageActionRow().addComponents(
-              new MessageButton()
-                .setCustomId("yes")
-                .setLabel("Yes")
-                .setStyle("PRIMARY"),
-              new MessageButton()
-                .setCustomId("no")
-                .setLabel("No")
-                .setStyle("DANGER")
+              new MessageButton().setCustomId("yes").setLabel("Yes").setStyle("PRIMARY"),
+              new MessageButton().setCustomId("no").setLabel("No").setStyle("DANGER")
             ),
           ],
           ephemeral: true,
@@ -127,12 +108,10 @@ export async function buttonResponse(interaction: ButtonInteraction) {
     if (interaction.component.customId == "no") {
       await interaction.update({
         embeds: [
-          new MessageEmbed()
-            .setColor("BLUE")
-            .setTitle(":information_source:  Information")
-            .setDescription(
-              "To add yourself to the existing plan use `/join`."
-            ),
+          statusEmbed({
+            level: "info",
+            message: "To add yourself to the existing plan use `/join`.",
+          }),
         ],
         components: [],
       });
@@ -143,11 +122,12 @@ export async function buttonResponse(interaction: ButtonInteraction) {
       // Update Button Message
       await interaction.update({
         embeds: [
-          new MessageEmbed()
-            .setColor("BLUE")
-            .setTitle(":information_source: Information")
-            .setDescription("Plan overwritten, you can dismiss this message."),
+          statusEmbed({
+            level: "info",
+            message: "Plan overwritten, you can dismiss this message.",
+          }),
         ],
+
         components: [],
       });
 
@@ -161,11 +141,7 @@ export async function buttonResponse(interaction: ButtonInteraction) {
       if (!interaction.guild) return;
 
       if (plan) {
-        const message = await messageExists(
-          interaction.guild,
-          plan.channelId,
-          plan.messageId
-        );
+        const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
 
         if (message) {
           await message.delete().catch((error) => logger.error(error));
