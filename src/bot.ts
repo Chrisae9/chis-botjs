@@ -6,15 +6,21 @@ import dotenv from "dotenv";
 import { changeStatus } from "./utils";
 import { createLogger, transports, format } from "winston";
 import moment from "moment-timezone";
+import { exit } from "node:process";
 
 // Environment Vars
 dotenv.config();
-const token = process.env.DISCORD_TOKEN!;
-const clientId = process.env.CLIENT_ID!;
-const guildId = process.env.GUILD_ID!;
-const accessRole = process.env.ROLE_ID!;
-const timezone = process.env.TIMEZONE!;
-const develop = process.env.DEVELOP!;
+const token = process.env.DISCORD_TOKEN;
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+const accessRole = process.env.ROLE_ID;
+const timezone = process.env.TIMEZONE;
+const environment = process.env.NODE_ENV;
+
+if (!token || !clientId || !guildId || !accessRole || !timezone || !environment){
+  console.error("BOT CONFIG ERROR: Check .env file.")
+  exit(1)
+}
 
 // logging
 export const logger = createLogger({
@@ -47,7 +53,7 @@ const commandFiles = fs.readdirSync(`${__dirname}/commands`);
 
 for (const file of commandFiles) {
   const command = require(`${__dirname}/commands/${file}`);
-  if (command.stable || parseInt(develop)) commands.push(command.data.toJSON());
+  if (command.stable || environment === "development") commands.push(command.data.toJSON());
 }
 
 const rest = new REST({ version: "9" }).setToken(token);
@@ -56,7 +62,7 @@ const rest = new REST({ version: "9" }).setToken(token);
   try {
     logger.info("Started refreshing application (/) commands.");
 
-    if (parseInt(develop)) {
+    if (environment === "development") {
       // Guild Commands (testing)
       await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
         body: commands,

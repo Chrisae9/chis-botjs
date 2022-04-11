@@ -10,7 +10,8 @@
     "api": "ts-node ./src/api.ts",
     "database": "ts-node ./src/database.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node --transpile-only src/bot.ts"
+    "start": "ts-node --transpile-only src/bot.ts",
+    "watch": "nodemon --ext js,mjs,json,ts --exec npm run-script dev"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
+    "nodemon": "^2.0.15",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   }

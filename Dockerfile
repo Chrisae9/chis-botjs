@@ -1,6 +1,6 @@
 FROM docker:latest
 
-RUN apk add --update npm 
+RUN apk add --update npm
 
 WORKDIR /bot
 

@@ -1,0 +1,8 @@
+FROM docker:latest
+
+RUN apk add --update npm bash
+
+WORKDIR /bot
+
+ENTRYPOINT ["/bin/bash"]
+

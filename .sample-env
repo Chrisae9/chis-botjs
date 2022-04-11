@@ -3,14 +3,19 @@ DISCORD_TOKEN=
 CLIENT_ID=
 GUILD_ID=
 ROLE_ID=
-DEVELOP=0
+NODE_ENV="production" # "development"
 TIMEZONE=America/New_York
 
 # Database
-DATABASE=chisbot
+DATABASE=chisbot # chisbot or chisbotdev
 POSTGRES_USER=username
 POSTGRES_PASSWORD=password
 POSTGRES_MULTIPLE_DATABASES="chisbot","chisbotdev"
 
-# Develop: localhost, Production: database
-POSTGRES_HOST=localhost 
+# Bot Run Method
+# Inside Container: database
+# Outside Container: localhost
+POSTGRES_HOST=database 
+
+# Database URL for pgweb (development)
+DATABASE_URL=postgres://username:password@postgres:5432/postgres?sslmode=disable

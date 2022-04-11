@@ -18,6 +18,12 @@ Due to the [instability](https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78
 - docker
 - docker-compose
 
+Create a `.env-prod` file using [.env-sample](./.sample-env) as a template.
+
+```bash
+docker-compose up -f docker-compose.prod.yaml
+```
+
 ### Development
 - Node.js >=16.0.0
 - VS Code (recommended)
@@ -28,10 +34,7 @@ Due to the [instability](https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78
 Create a `.env` file using [.env-sample](./.sample-env) as a template.
 
 ```bash
-docker-compose up docker-compose.yaml
+docker-compose up
 ```
 
-
 *More Information at [chis.dev](https://chis.dev/chis-botjs/).*
- 
-

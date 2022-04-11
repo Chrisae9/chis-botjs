@@ -1,18 +1,16 @@
 version: "3.7"
 services:
-  bot-dev:
+  bot:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    command: /bot/scripts/docker-dev-entrypoint.sh
-    container_name: "chis-bot-dev"
+      dockerfile: Dockerfile
+    container_name: "chis-bot"
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.prod
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./prod_logs:/bot/logs
-      - ./:/bot
     depends_on:
       - "database"
   database:
@@ -20,20 +18,8 @@ services:
     container_name: "postgres"
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.prod
     volumes:
       - ./scripts/postgres:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-  pgweb:
-    container_name: pgweb
-    restart: unless-stopped
-    image: sosedoff/pgweb
-    ports: 
-      - "5433:8081" 
-    links:
-      - database:postgres
-    env_file:
-      - .env
-    depends_on:
-      - database

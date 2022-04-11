@@ -1,6 +1,7 @@
 import { Sequelize, DataTypes, Model } from "sequelize";
 import dotenv from "dotenv";
 import { logger } from "./bot";
+import { exit } from "node:process";
 
 // Database Environment Vars
 dotenv.config();
@@ -8,8 +9,12 @@ const db = process.env.DATABASE!;
 const user = process.env.POSTGRES_USER!;
 const pass = process.env.POSTGRES_PASSWORD!;
 const host = process.env.POSTGRES_HOST!;
-const develop = process.env.DEVELOP!;
+const environment = process.env.NODE_ENV!;
 
+if (!db || !user || !pass || !host || !environment){
+  console.error("DATABASE CONFIG ERROR: Check .env file.")
+  exit(1)
+}
 // Configure Database
 const sequelize = new Sequelize(db, user, pass, {
   host: host,
@@ -215,7 +220,7 @@ export class Database {
     logger.info("Connection has been established successfully.");
 
     // Refresh Table (change to true to clear all data)
-    if (parseInt(develop)) {
+    if (environment === "development") {
       await sequelize.sync({ force: true });
     } else {
       await sequelize.sync({ force: false });
