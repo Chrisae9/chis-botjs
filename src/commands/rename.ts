@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
+import { logger } from "../bot";
 import { Database } from "../database";
-import { embed } from "../utils";
+import { embed, messageExists } from "../utils";
 
 export const stable = true;
 
@@ -15,56 +16,48 @@ export const data = new SlashCommandBuilder()
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
-  const title = interaction.options.getString("title");
+  var title = interaction.options.getString("title");
+  if (!title || title.length > 256) {
+    title = ":notebook_with_decorative_cover: Game Plan";
+  }
 
   // Establish Connection To Database
+  if (!interaction.guild) return;
   const data = new Database(interaction.guild!.id);
 
   // Rename Plan
-  data.rename(title).then(async (plan) => {
-    if (title != null && title.length) {
-      // Delete Previous Message
-      interaction
-        .guild!.channels.fetch(plan.channelId)
-        .then(async (channel) => {
-          if (channel === null || !channel.isText()) return;
+  const plan = await data.rename(title);
 
-          channel.messages
-            .fetch(plan.messageId)
-            .then(async (message) => {
-              await message.delete();
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+  if (plan) {
+    // Delete Previous Message
+    const message = await messageExists(
+      interaction.guild,
+      plan.channelId,
+      plan.messageId
+    );
 
-      // Send Embed
-      await interaction.reply({
-        embeds: [embed(plan.title, plan.spots, plan.participants)],
-        ephemeral: false,
-      });
+    if (message) await message.delete().catch((error) => logger.error(error));
 
-      // Save Last Message
-      interaction.fetchReply().then(async (message) => {
-        if (!("channelId" in message)) return;
+    // Send Embed
+    await interaction.reply({
+      embeds: [embed(plan.title, plan.spots, plan.participants)],
+      ephemeral: false,
+    });
 
-        await data.lastMessage(message.channelId, message.id);
-      });
-    } else {
-      // Send Error Embed
-      await interaction.reply({
-        embeds: [
-          new MessageEmbed()
-            .setColor("RED")
-            .setTitle(":warning: Warning")
-            .setDescription("Please provide a valid title."),
-        ],
-        ephemeral: true,
-      });
-    }
-  });
+    // Save Last Message
+    const replyMessage = await interaction.fetchReply();
+    if (!("channelId" in replyMessage)) return;
+    await data.lastMessage(replyMessage.channelId, replyMessage.id);
+  } else {
+    // Send Error Embed
+    await interaction.reply({
+      embeds: [
+        new MessageEmbed()
+          .setColor("RED")
+          .setTitle(":warning: Warning")
+          .setDescription("Plan not created."),
+      ],
+      ephemeral: true,
+    });
+  }
 }
