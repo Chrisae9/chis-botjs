@@ -42,7 +42,6 @@ export const autocomplete = {
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
-  await interaction.deferReply();
 
   const data = new Database(interaction.guild!.id);
 
@@ -55,7 +54,7 @@ export async function run(interaction: CommandInteraction) {
   // Verify timezone is real
   const tz = moment.tz.zone(timezoneArg);
   if (tz === null) {
-    await interaction.followUp({
+    await interaction.reply({
       embeds: [
         statusEmbed({
           level: "error",
@@ -70,7 +69,7 @@ export async function run(interaction: CommandInteraction) {
   // Save the timezone
   await data.saveUserTz(interaction.user.id, timezoneArg);
 
-  await interaction.followUp({
+  await interaction.reply({
     embeds: [
       statusEmbed({
         level: "success",
