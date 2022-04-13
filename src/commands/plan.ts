@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { parseDate } from "chrono-node";
+import { Chrono, parseDate } from "chrono-node";
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
 import moment from "moment-timezone";
 import dotenv from "dotenv";
 import userTime from "user-time";
 import { logger } from "../bot";
 import { Database, Plan } from "../database";
-import { embed, messageExists, statusEmbed } from "../utils";
+import { defaultPM, embed, messageExists, statusEmbed } from "../utils";
 
 dotenv.config();
 const timezone = process.env.TIMEZONE!;
@@ -66,14 +66,14 @@ export async function run(interaction: CommandInteraction) {
       // Add a Day If Time is Before Now
       if (time) {
         var user_time = moment.tz(time, "h:m a", ref_timezone);
-        user_time.diff(now) < 0
+        (user_time.diff(now) > 0)
           ? (time = user_time)
           : (time = user_time.clone().add(1, "days").toISOString());
       }
 
       // If Fail, Use chrono-node Parser
       if (!time)
-        time = parseDate(input_time, {
+        time = defaultPM.parseDate(input_time, {
           timezone: moment.tz(ref_timezone).zoneAbbr(),
         }).toISOString();
     } catch (error) {

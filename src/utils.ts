@@ -106,3 +106,22 @@ export async function messageExists(guild: Guild, channelId: string, messageId: 
 
   return await channel.messages.fetch(messageId).catch((error) => logger.error(error) && undefined);
 }
+
+var chrono = require('chrono-node')
+export var defaultPM = new chrono.Chrono();
+defaultPM.refiners.push({
+  refine: (context: any, results: any[]) => {
+    // If there is no AM/PM (meridiem) specified,
+    //  let all time between 1:00 - 4:00 be PM (13.00 - 16.00)
+    results.forEach((result) => {
+      const hour = result.start.get("hour");
+      if (hour === null) return;
+      if (!result.start.isCertain("meridiem") && hour >= 1 && hour < 4) {
+        result.start.assign("meridiem", 1);
+        result.start.assign("hour", hour + 12);
+      }
+    });
+    logger.info("parser added");
+    return results;
+  },
+});
