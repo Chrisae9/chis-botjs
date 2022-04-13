@@ -4,10 +4,9 @@ import moment from "moment";
 import { Searcher } from "fast-fuzzy";
 
 import { Database } from "../database";
-import { statusEmbed } from "../utils";
+import { MAX_DISCORD_CHOICES, statusEmbed } from "../utils";
 
 const TZ_SEARCHER = new Searcher(moment.tz.names());
-const MAX_DISCORD_CHOICES = 25;
 
 export const stable = true;
 
@@ -42,7 +41,6 @@ export const autocomplete = {
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
-
   const data = new Database(interaction.guild!.id);
 
   // Get arguments
@@ -74,7 +72,7 @@ export async function run(interaction: CommandInteraction) {
       statusEmbed({
         level: "success",
         title: "Timezone Saved",
-        message: `You will now see events in \`${timezoneArg}\` timezone.`,
+        message: `Your timezone has been set to \`${timezoneArg}\`.`,
       }),
     ],
     ephemeral: true,
