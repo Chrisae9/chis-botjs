@@ -72,7 +72,7 @@ export async function run(interaction: CommandInteraction) {
       statusEmbed({
         level: "success",
         title: "Timezone Saved",
-        message: `Your timezone has been set to \`${timezoneArg}\`.`,
+        message: `Your timezone has been set to \`${timezoneArg}\`.\n \`/plan time\` option will now use your locale.\n` + "\n**Example Time Inputs:**\n `9`\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
       }),
     ],
     ephemeral: true,

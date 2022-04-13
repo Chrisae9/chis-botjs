@@ -82,7 +82,7 @@ export async function run(interaction: CommandInteraction) {
         embeds: [
           statusEmbed({
             level: "error",
-            message: "Please specify a correct time.\nEx: `9pm`",
+            message: "Please specify a correct time.\nExamples:\n `9` (Defaults to PM)\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
           }),
         ],
         ephemeral: true,

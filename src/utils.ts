@@ -116,12 +116,11 @@ defaultPM.refiners.push({
     results.forEach((result) => {
       const hour = result.start.get("hour");
       if (hour === null) return;
-      if (!result.start.isCertain("meridiem") && hour >= 1 && hour < 4) {
+      if (!result.start.isCertain("meridiem") && hour >= 1 && hour < 12) {
         result.start.assign("meridiem", 1);
         result.start.assign("hour", hour + 12);
       }
     });
-    logger.info("parser added");
     return results;
   },
 });
