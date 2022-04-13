@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { Client } from "discord.js";
 import { logger } from "./bot";
 import { services } from "./commands/server";
+import moment from "moment-timezone";
 
 export const MAX_DISCORD_CHOICES = 25;
 
@@ -124,3 +125,13 @@ defaultPM.refiners.push({
     return results;
   },
 });
+
+const deprecatedTimeZones = ["UCT", "PST8PDT", "GB", "MST7MDT", "EST5EDT", "W-SU", "CST6CDT", "HST", "MST", "Universal", "EET", "WET", "EST", "CET", "MET", "GMT", "Etc"];
+const deprecatedTimeZonesRegex = `^${deprecatedTimeZones.join("|^")}`;
+
+export const allowedTimeZones = moment.tz.names()
+    .filter(timezone => timezone.startsWith("A") || !new RegExp(deprecatedTimeZonesRegex).test(timezone))
+    .sort((timezoneA, timezoneB) => timezoneA.localeCompare(timezoneB))
+    .map(timezone => (
+        timezone
+    ));

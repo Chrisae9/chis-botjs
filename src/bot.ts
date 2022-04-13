@@ -122,7 +122,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isCommand()) {
     // Interaction is a command
     logger.warn(
-      `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command}.`
+      `${interaction.user.id}: ${interaction.user.username} issued the ${interaction.commandName} command.`
     );
 
     if (commandFiles.includes(`${interaction.commandName}.ts`)) {

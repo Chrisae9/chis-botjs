@@ -4,9 +4,9 @@ import moment from "moment";
 import { Searcher } from "fast-fuzzy";
 
 import { Database } from "../database";
-import { MAX_DISCORD_CHOICES, statusEmbed } from "../utils";
+import { allowedTimeZones, MAX_DISCORD_CHOICES, statusEmbed } from "../utils";
 
-const TZ_SEARCHER = new Searcher(moment.tz.names());
+const TZ_SEARCHER = new Searcher(allowedTimeZones);
 
 export const stable = true;
 
