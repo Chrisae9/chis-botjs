@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Chrono, parseDate } from "chrono-node";
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
 import moment from "moment-timezone";
 import dotenv from "dotenv";
@@ -66,23 +65,26 @@ export async function run(interaction: CommandInteraction) {
       // Add a Day If Time is Before Now
       if (time) {
         var user_time = moment.tz(time, "h:m a", ref_timezone);
-        (user_time.diff(now) > 0)
+        user_time.diff(now) > 0
           ? (time = user_time)
           : (time = user_time.clone().add(1, "days").toISOString());
       }
 
       // If Fail, Use chrono-node Parser
       if (!time)
-        time = defaultPM.parseDate(input_time, {
-          timezone: moment.tz(ref_timezone).zoneAbbr(),
-        }).toISOString();
+        time = defaultPM
+          .parseDate(input_time, {
+            timezone: moment.tz(ref_timezone).zoneAbbr(),
+          })
+          .toISOString();
     } catch (error) {
       // Send Time Error Embed
       await interaction.reply({
         embeds: [
           statusEmbed({
             level: "error",
-            message: "Please specify a correct time.\nExamples:\n `9` (Defaults to PM)\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
+            message:
+              "Please specify a correct time.\nExamples:\n `9` (Defaults to PM)\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
           }),
         ],
         ephemeral: true,

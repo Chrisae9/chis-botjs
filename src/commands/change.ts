@@ -3,8 +3,7 @@ import { CommandInteraction } from "discord.js";
 import { logger } from "../bot";
 import dotenv from "dotenv";
 import { Database } from "../database";
-import { embed, messageExists, statusEmbed } from "../utils";
-import { parseDate } from "chrono-node";
+import { defaultPM, embed, messageExists, statusEmbed } from "../utils";
 import moment from "moment";
 import userTime from "user-time";
 
@@ -59,23 +58,26 @@ export async function run(interaction: CommandInteraction) {
       // Add a Day If Time is Before Now
       if (time) {
         var user_time = moment.tz(time, "h:m a", ref_timezone);
-        user_time.diff(now) < 0
+        user_time.diff(now) > 0
           ? (time = user_time)
           : (time = user_time.clone().add(1, "days").toISOString());
       }
 
       // If Fail, Use chrono-node Parser
       if (!time)
-        time = parseDate(input_time, {
-          timezone: moment.tz(ref_timezone).zoneAbbr(),
-        }).toISOString();
+        time = defaultPM
+          .parseDate(input_time, {
+            timezone: moment.tz(ref_timezone).zoneAbbr(),
+          })
+          .toISOString();
     } catch (error) {
       // Send Time Error Embed
       await interaction.reply({
         embeds: [
           statusEmbed({
             level: "error",
-            message: "Please specify a correct time.\nEx: `9pm`",
+            message:
+              "Please specify a correct time.\nExamples:\n `9` (Defaults to PM)\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
           }),
         ],
         ephemeral: true,

@@ -33,7 +33,7 @@ export async function run(interaction: CommandInteraction) {
 
     // Send Embed
     await interaction.reply({
-      embeds: [embed(plan.title, plan.spots, plan.participants)],
+      embeds: [embed(plan.title, plan.spots, plan.participants, plan.time)],
       ephemeral: false,
     });
 
