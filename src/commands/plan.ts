@@ -65,7 +65,6 @@ export async function run(interaction: CommandInteraction) {
 
       // Add a Day If Time is Before Now
       if (time) {
-        //@ts-ignore
         var user_time = moment.tz(time, "h:m a", ref_timezone);
         user_time.diff(now) < 0
           ? (time = user_time)

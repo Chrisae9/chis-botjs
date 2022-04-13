@@ -171,11 +171,13 @@ export class Database {
     return await this.update(plan);
   }
 
-  async rename(title: any) {
+  async change(title: string | undefined, spots: number | undefined, time: string | undefined) {
     const plan = await this.read();
     if (!plan) return;
 
-    plan.title = title;
+    if (title) plan.title = title;
+    if (spots) plan.spots = spots;
+    if (time) plan.time = time;
 
     return await this.update(plan);
   }
