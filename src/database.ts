@@ -176,7 +176,13 @@ export class Database {
     if (!plan) return;
 
     if (title) plan.title = title;
-    if (spots) plan.spots = spots;
+    if (spots) {
+      plan.spots = spots;
+      plan.participants = Object.assign(
+        [],
+        plan.participants.length <= spots ? plan.participants : plan.participants.slice(0, spots)
+      );
+    }
     if (time) plan.time = time;
 
     return await this.update(plan);

@@ -15,8 +15,8 @@ export const stable = true;
 
 // Slash Command
 export const data = new SlashCommandBuilder()
-  .setName("edit")
-  .setDescription("Edit an aspect of the plan")
+  .setName("change")
+  .setDescription("Change an aspect of the plan")
   .addStringOption((option) =>
     option.setName("title").setDescription("The title of the plan").setRequired(false)
   )
