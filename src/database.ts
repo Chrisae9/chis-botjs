@@ -11,14 +11,15 @@ const pass = process.env.POSTGRES_PASSWORD!;
 const host = process.env.POSTGRES_HOST!;
 const environment = process.env.NODE_ENV!;
 
-if (!db || !user || !pass || !host || !environment){
-  console.error("DATABASE CONFIG ERROR: Check .env file.")
-  exit(1)
+if (!db || !user || !pass || !host || !environment) {
+  console.error("DATABASE CONFIG ERROR: Check .env file.");
+  exit(1);
 }
 // Configure Database
 const sequelize = new Sequelize(db, user, pass, {
   host: host,
   dialect: "postgres",
+  logging: false,
 });
 
 // Construct Models
@@ -26,6 +27,7 @@ export class Plan extends Model {
   declare id: string;
   declare title: string;
   declare spots: number;
+  declare time: string;
   declare participants: string[];
   declare messageId: string;
   declare channelId: string;
@@ -69,6 +71,10 @@ Plan.init(
       type: DataTypes.INTEGER,
       defaultValue: 10,
       allowNull: false,
+    },
+    time: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     participants: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
@@ -115,12 +121,13 @@ export class Database {
   constructor(guildId: any) {
     this.guildId = guildId;
   }
-  async create(user: string, title?: string, spots?: number) {
+  async create(user: string, title?: string, spots?: number, time?: string) {
     await this.delete();
     return await Plan.create({
       id: this.guildId,
       title: title,
       spots: spots,
+      time: time,
       participants: [user],
     });
   }

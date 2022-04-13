@@ -9,5 +9,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
-  }
+  },
+	"ts-node": {
+		"files": true
+	},
+	"files": [ "src/user-time.d.ts" ]
 }
