@@ -1,22 +1,22 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import {
-  ButtonInteraction,
-  CommandInteraction,
-  Guild,
-  MessageActionRow,
-  MessageButton,
-  MessageEmbed,
-} from "discord.js";
+import { parseDate } from "chrono-node";
+import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
 import moment from "moment-timezone";
+import dotenv from "dotenv";
+import userTime from "user-time";
 import { logger } from "../bot";
 import { Database, Plan } from "../database";
 import { embed, messageExists, statusEmbed } from "../utils";
+
+dotenv.config();
+const timezone = process.env.TIMEZONE!;
 
 export const stable = true;
 
 const PLAN_PROTECTION_SECONDS = 60 * 60 * 1; // 1 hour
 
-var cacheMessage: { title: string; spots: number } | undefined = undefined;
+var cacheMessage: { title: string; spots: number; time: string | undefined } | undefined =
+  undefined;
 
 // Slash Command
 export const data = new SlashCommandBuilder()
@@ -27,11 +27,18 @@ export const data = new SlashCommandBuilder()
   )
   .addIntegerOption((option) =>
     option.setName("spots").setDescription("The number of spots in the plan").setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("time")
+      .setDescription(`Time of event. Use /timezone to set your locale. (Default ${timezone})`)
+      .setRequired(false)
   );
 
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
   //Grab State
+  const now = moment();
   const user = interaction.user;
   var title = interaction.options.getString("title");
   if (!title || title.length > 256) title = ":notebook_with_decorative_cover: Game Plan";
@@ -39,10 +46,54 @@ export async function run(interaction: CommandInteraction) {
   if (spots > 20) {
     spots = 20;
   }
+  var input_time = interaction.options.getString("time");
 
   // Establish Connection To Database
   if (!interaction.guild) return;
   const data = new Database(interaction.guild.id);
+
+  // Grab User Timezone or Use Default
+  var ref_timezone = (await data.getUserTz(user.id)) || timezone;
+
+  // Parse Time Input
+  var time = undefined;
+  if (input_time) {
+    try {
+      // Start With user-time Parser
+      if (input_time.match(/^\d/))
+        time = userTime(input_time, { defaultTimeOfDay: "pm" }).formattedTime;
+
+      // Add a Day If Time is Before Now
+      if (time) {
+        //@ts-ignore
+        var user_time = moment.tz(time, "h:m a", ref_timezone);
+        user_time.diff(now) < 0
+          ? (time = user_time)
+          : (time = user_time.clone().add(1, "days").toISOString());
+      }
+
+      // If Fail, Use chrono-node Parser
+      if (!time)
+        time = parseDate(input_time, {
+          timezone: moment.tz(ref_timezone).zoneAbbr(),
+        }).toISOString();
+    } catch (error) {
+      // Send Time Error Embed
+      await interaction.reply({
+        embeds: [
+          statusEmbed({
+            level: "error",
+            message: "Please specify a correct time.\nEx: `9pm`",
+          }),
+        ],
+        ephemeral: true,
+      });
+      return;
+    }
+  }
+
+  // Convert Time to Right Timezone
+  if (time) time = moment.tz(time, (await data.getUserTz(user.id)) || timezone).toISOString();
 
   // Read Plan
   var plan = await data.read();
@@ -52,7 +103,6 @@ export async function run(interaction: CommandInteraction) {
     const message = await messageExists(interaction.guild, plan.channelId, plan.messageId);
     if (message) {
       // Calculate Seconds Since Last Plan Activity
-      const now = moment();
       const messageTime = moment(message.createdTimestamp);
       const timeDifference = now.diff(messageTime, "seconds");
 
@@ -76,7 +126,7 @@ export async function run(interaction: CommandInteraction) {
         });
 
         // Temporarily save data
-        cacheMessage = { title: title, spots: spots };
+        cacheMessage = { title: title, spots: spots, time: time };
 
         // Stop and don't create new plan. (Wait for button press)
         return;
@@ -85,12 +135,12 @@ export async function run(interaction: CommandInteraction) {
   }
 
   // Create Plan
-  plan = await data.create(user.id, title, spots);
+  plan = await data.create(user.id, title, spots, time);
 
   // Send Plan Embed
   await interaction
     .reply({
-      embeds: [embed(plan.title, plan.spots, plan.participants)],
+      embeds: [embed(plan.title, plan.spots, plan.participants, plan.time)],
       ephemeral: false,
     })
     .catch((error) => logger.error(error));
@@ -151,11 +201,12 @@ export async function buttonResponse(interaction: ButtonInteraction) {
         plan = await data.create(
           interaction.user.id,
           cacheMessage?.title || ":notebook_with_decorative_cover: Game Plan",
-          cacheMessage?.spots || 10
+          cacheMessage?.spots || 10,
+          cacheMessage?.time
         );
         // Send Embed
         const followUpMessage = await interaction.followUp({
-          embeds: [embed(plan.title, plan.spots, plan.participants)],
+          embeds: [embed(plan.title, plan.spots, plan.participants, plan.time)],
           ephemeral: false,
         });
 

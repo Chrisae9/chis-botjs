@@ -4,7 +4,9 @@ import { Client } from "discord.js";
 import { logger } from "./bot";
 import { services } from "./commands/server";
 
-export function embed(title: string, spots: number, participants: string[]) {
+export const MAX_DISCORD_CHOICES = 25;
+
+export function embed(title: string, spots: number, participants: string[], time?: string) {
   var mention = "No one has joined the plan.";
   if (participants.length)
     mention = participants
@@ -12,7 +14,7 @@ export function embed(title: string, spots: number, participants: string[]) {
       .join(`\n`);
   return new MessageEmbed()
     .setColor("PURPLE")
-    .setTitle(title)
+    .setTitle(title + (time ? ` @ <t:${Math.round(new Date(time).getTime() / 1000)}:t>` : ""))
     .setAuthor({
       name: "Chis Bot",
       iconURL:
