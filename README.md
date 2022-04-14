@@ -26,10 +26,10 @@ docker-compose up -f docker-compose.prod.yaml
 
 ### Development
 - Node.js >=16.0.0
-- VS Code (recommended)
-  -  docker-extension
-
-## Installation
+- [VS Code](https://code.visualstudio.com/)
+  -  [docker-extension](https://code.visualstudio.com/docs/containers/overview)
+  -  [remote-container extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [Developing Inside a Container](https://code.visualstudio.com/docs/remote/containers) (resource)
 
 Create a `.env` file using [.env-sample](./.sample-env) as a template.
 
