@@ -1,20 +1,14 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageEmbed } from "discord.js";
 import { exec } from "child_process";
-import { changeStatus } from "../utils";
+import { CommandInteraction, MessageEmbed } from "discord.js";
 import { logger } from "../bot";
+import { changeStatus } from "../utils";
 
 // Production Ready flag
 export const stable = true;
 
 // Services
-export const services = [
-  "7dtd",
-  "valheim",
-  "minecraft",
-  "csgo",
-  "satisfactory",
-];
+export const services = ["7dtd", "valheim", "minecraft", "csgo", "satisfactory"];
 
 // Slash Command
 export const data = new SlashCommandBuilder()

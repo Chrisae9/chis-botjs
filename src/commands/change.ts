@@ -1,11 +1,10 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { logger } from "../bot";
 import dotenv from "dotenv";
-import { Database } from "../database";
-import { defaultPM, embed, messageExists, statusEmbed } from "../utils";
 import moment from "moment";
-import userTime from "user-time";
+import { logger } from "../bot";
+import { Database } from "../database";
+import { embed, messageExists, parseTime, statusEmbed } from "../utils";
 
 dotenv.config();
 const timezone = process.env.TIMEZONE!;
@@ -38,7 +37,7 @@ export async function run(interaction: CommandInteraction) {
   if (!title || title.length > 256) title = undefined;
   var spots = interaction.options.getInteger("spots") || undefined;
   if (!spots || spots > 20) spots = undefined;
-  var input_time = interaction.options.getString("time");
+  var time = interaction.options.getString("time") || undefined;
 
   // Establish Connection To Database
   if (!interaction.guild) return;
@@ -48,28 +47,9 @@ export async function run(interaction: CommandInteraction) {
   var ref_timezone = (await data.getUserTz(user.id)) || timezone;
 
   // Parse Time Input
-  var time = undefined;
-  if (input_time) {
+  if (time) {
     try {
-      // Start With user-time Parser
-      if (input_time.match(/^\d/))
-        time = userTime(input_time, { defaultTimeOfDay: "pm" }).formattedTime;
-
-      // Add a Day If Time is Before Now
-      if (time) {
-        var user_time = moment.tz(time, "h:m a", ref_timezone);
-        user_time.diff(now) > 0
-          ? (time = user_time)
-          : (time = user_time.clone().add(1, "days").toISOString());
-      }
-
-      // If Fail, Use chrono-node Parser
-      if (!time)
-        time = defaultPM
-          .parseDate(input_time, {
-            timezone: moment.tz(ref_timezone).zoneAbbr(),
-          })
-          .toISOString();
+      time = parseTime(time, ref_timezone);
     } catch (error) {
       // Send Time Error Embed
       await interaction.reply({

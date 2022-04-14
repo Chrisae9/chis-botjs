@@ -1,7 +1,7 @@
-import { Sequelize, DataTypes, Model } from "sequelize";
 import dotenv from "dotenv";
-import { logger } from "./bot";
 import { exit } from "node:process";
+import { DataTypes, Model, Sequelize } from "sequelize";
+import { logger } from "./bot";
 
 // Database Environment Vars
 dotenv.config();

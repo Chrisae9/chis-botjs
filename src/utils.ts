@@ -1,9 +1,9 @@
-import { Guild, MessageEmbed } from "discord.js";
 import { exec } from "child_process";
-import { Client } from "discord.js";
+import { Client, Guild, MessageEmbed } from "discord.js";
+import moment from "moment-timezone";
+import userTime from "user-time";
 import { logger } from "./bot";
 import { services } from "./commands/server";
-import moment from "moment-timezone";
 
 export const MAX_DISCORD_CHOICES = 25;
 
@@ -105,10 +105,12 @@ export async function messageExists(guild: Guild, channelId: string, messageId: 
 
   if (channel === null || !channel.isText()) return;
 
-  return await channel.messages.fetch(messageId).catch((error) => logger.error(error) && undefined);
+  return await channel.messages
+    .fetch(messageId)
+    .catch((error: any) => logger.error(error) && undefined);
 }
 
-var chrono = require('chrono-node')
+var chrono = require("chrono-node");
 export var defaultPM = new chrono.Chrono();
 defaultPM.refiners.push({
   refine: (context: any, results: any[]) => {
@@ -126,12 +128,56 @@ defaultPM.refiners.push({
   },
 });
 
-const deprecatedTimeZones = ["UCT", "PST8PDT", "GB", "MST7MDT", "EST5EDT", "W-SU", "CST6CDT", "HST", "MST", "Universal", "EET", "WET", "EST", "CET", "MET", "GMT", "Etc"];
+const deprecatedTimeZones = [
+  "UCT",
+  "PST8PDT",
+  "GB",
+  "MST7MDT",
+  "EST5EDT",
+  "W-SU",
+  "CST6CDT",
+  "HST",
+  "MST",
+  "Universal",
+  "EET",
+  "WET",
+  "EST",
+  "CET",
+  "MET",
+  "GMT",
+  "Etc",
+];
 const deprecatedTimeZonesRegex = `^${deprecatedTimeZones.join("|^")}`;
 
-export const allowedTimeZones = moment.tz.names()
-    .filter(timezone => timezone.startsWith("A") || !new RegExp(deprecatedTimeZonesRegex).test(timezone))
-    .sort((timezoneA, timezoneB) => timezoneA.localeCompare(timezoneB))
-    .map(timezone => (
-        timezone
-    ));
+export const allowedTimeZones = moment.tz
+  .names()
+  .filter(
+    (timezone) => timezone.startsWith("A") || !new RegExp(deprecatedTimeZonesRegex).test(timezone)
+  )
+  .sort((timezoneA, timezoneB) => timezoneA.localeCompare(timezoneB))
+  .map((timezone) => timezone);
+
+export function parseTime(input_time: string, ref_timezone: string) {
+  const now = moment();
+  var time = undefined;
+  // Start With user-time Parser
+  if (input_time.match(/^\d/))
+    time = userTime(input_time, { defaultTimeOfDay: "pm" }).formattedTime;
+
+  // Add a Day If Time is Before Now
+  if (time) {
+    var user_time = moment.tz(time, "h:m a", ref_timezone);
+    user_time.diff(now) > 0
+      ? (time = user_time)
+      : (time = user_time.clone().add(1, "days").toISOString());
+  }
+
+  // If Fail, Use chrono-node Parser
+  if (!time)
+    time = defaultPM
+      .parseDate(input_time, {
+        timezone: moment.tz(ref_timezone).zoneAbbr(),
+      })
+      .toISOString();
+  return time;
+}

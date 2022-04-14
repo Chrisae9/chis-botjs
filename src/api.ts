@@ -1,7 +1,7 @@
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
-import fs from "node:fs";
 import dotenv from "dotenv";
+import fs from "node:fs";
 import { logger } from "./bot";
 
 // Environment Vars
@@ -33,9 +33,7 @@ async function loadApplicationCommands() {
     rest.get(Routes.applicationCommands(clientId)).then((data: any) => {
       const promises = [];
       for (const command of data) {
-        const deleteUrl: any = `${Routes.applicationCommands(clientId)}/${
-          command.id
-        }`;
+        const deleteUrl: any = `${Routes.applicationCommands(clientId)}/${command.id}`;
         promises.push(rest.delete(deleteUrl));
       }
       return Promise.all(promises);

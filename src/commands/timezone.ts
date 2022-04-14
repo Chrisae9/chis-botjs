@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, AutocompleteInteraction } from "discord.js";
-import moment from "moment";
+import { AutocompleteInteraction, CommandInteraction } from "discord.js";
 import { Searcher } from "fast-fuzzy";
-
+import moment from "moment";
 import { Database } from "../database";
 import { allowedTimeZones, MAX_DISCORD_CHOICES, statusEmbed } from "../utils";
 
@@ -72,7 +71,9 @@ export async function run(interaction: CommandInteraction) {
       statusEmbed({
         level: "success",
         title: "Timezone Saved",
-        message: `Your timezone has been set to \`${timezoneArg}\`.\n \`/plan time\` option will now use your locale.\n` + "\n**Example Time Inputs:**\n `9`\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
+        message:
+          `Your timezone has been set to \`${timezoneArg}\`.\n \`/plan time\` option will now use your locale.\n` +
+          "\n**Example Time Inputs:**\n `9`\n`Tomorrow at noon`\n`Friday at 7am`\n`This is at 2.30`",
       }),
     ],
     ephemeral: true,

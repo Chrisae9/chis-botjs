@@ -1,12 +1,12 @@
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Client, Intents } from "discord.js";
-import fs from "node:fs";
 import dotenv from "dotenv";
-import { changeStatus } from "./utils";
-import { createLogger, transports, format } from "winston";
 import moment from "moment-timezone";
+import fs from "node:fs";
 import { exit } from "node:process";
+import { createLogger, format, transports } from "winston";
+import { changeStatus } from "./utils";
 
 // Environment Vars
 dotenv.config();
@@ -17,9 +17,9 @@ const accessRole = process.env.ROLE_ID;
 const timezone = process.env.TIMEZONE;
 const environment = process.env.NODE_ENV;
 
-if (!token || !clientId || !guildId || !accessRole || !timezone || !environment){
-  console.error("BOT CONFIG ERROR: Check .env file.")
-  exit(1)
+if (!token || !clientId || !guildId || !accessRole || !timezone || !environment) {
+  console.error("BOT CONFIG ERROR: Check .env file.");
+  exit(1);
 }
 
 // logging
@@ -126,9 +126,7 @@ client.on("interactionCreate", async (interaction) => {
     );
 
     if (commandFiles.includes(`${interaction.commandName}.ts`)) {
-      await require(`./commands/${interaction.commandName}.ts`).run(
-        interaction
-      );
+      await require(`./commands/${interaction.commandName}.ts`).run(interaction);
     }
   } else if (interaction.isAutocomplete()) {
     // Interaction is an autocomplete event
@@ -143,10 +141,7 @@ client.on("interactionCreate", async (interaction) => {
           const autocompleteInput = interaction.options.getString(optionName);
           if (autocompleteInput !== null) {
             // This auto-complete event is for this option
-            await cmdMod.autocomplete[optionName](
-              interaction,
-              autocompleteInput
-            );
+            await cmdMod.autocomplete[optionName](interaction, autocompleteInput);
           }
         }
       }
