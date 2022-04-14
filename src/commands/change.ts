@@ -67,7 +67,7 @@ export async function run(interaction: CommandInteraction) {
   }
 
   // Convert Time to Right Timezone
-  if (time) time = moment.tz(time, (await data.getUserTz(user.id)) || timezone).toISOString();
+  if (time) time = moment.tz(time, ref_timezone).toISOString();
 
   // Change Plan
   const plan = await data.change(title, spots, time);
