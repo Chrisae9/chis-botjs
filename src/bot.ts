@@ -26,7 +26,7 @@ if (!token || !clientId || !guildId || !accessRole || !timezone || !environment)
 export const logger = createLogger({
   level: "info",
   format: format.combine(
-    format.timestamp({ format: moment().tz(timezone).format() }),
+    format.timestamp({ format: () => moment().tz(timezone).format() }),
     format.printf(({ timestamp, level, message }) => {
       return `[${timestamp}] ${level}: ${message}`;
     })
