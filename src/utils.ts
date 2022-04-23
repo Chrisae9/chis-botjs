@@ -13,23 +13,26 @@ export function embed(title: string, spots: number, participants: string[], time
     mention = participants
       .map((participant: string, x: number) => `${x + 1}. <@!${participant}>`)
       .join(`\n`);
-  return new MessageEmbed()
-    .setColor("PURPLE")
-    .setTitle(title + (time ? ` @ <t:${Math.round(new Date(time).getTime() / 1000)}:t>` : ""))
-    .setAuthor({
-      name: "Chis Bot",
-      iconURL:
-        "https://cdn.discordapp.com/app-icons/724657775652634795/22a8bc7ffce4587048cb74b41d2a7363.png?size=512",
-      url: "https://chis.dev/chis-botjs/",
-    })
-    .addField(`Participants (${participants.length}/${spots})`, mention)
-    .addField(`Slash Commands`, `/join, /leave, /change, /view, /gather`)
-    .setTimestamp()
-    .setFooter({
-      text: "server.chis.dev",
-      iconURL:
-        "https://cdn.discordapp.com/avatars/219152343588012033/4c7053ce4c177cdab007d986c47b9410.webp?size=512",
-    });
+  var embed = new MessageEmbed();
+  embed.setColor("PURPLE");
+  embed.setAuthor({
+    name: "Chis Bot",
+    iconURL:
+      "https://cdn.discordapp.com/app-icons/724657775652634795/22a8bc7ffce4587048cb74b41d2a7363.png?size=512",
+    url: "https://chis.dev/chis-botjs/",
+  });
+  // embed.setTitle(title + (time ? ` @ <t:${Math.round(new Date(time).getTime() / 1000)}:t>` : ""));
+  embed.setTitle(title);
+  if (time) embed.addField(`Event Time`, `<t:${Math.round(new Date(time).getTime() / 1000)}:F>`);
+
+  embed.addField(`Participants (${participants.length}/${spots})`, mention);
+  embed.addField(`Slash Commands`, `/join, /leave, /change, /view, /gather`);
+  embed.setTimestamp().setFooter({
+    text: "server.chis.dev",
+    iconURL:
+      "https://cdn.discordapp.com/avatars/219152343588012033/4c7053ce4c177cdab007d986c47b9410.webp?size=512",
+  });
+  return embed;
 }
 
 /**
