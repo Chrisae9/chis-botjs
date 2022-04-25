@@ -31,7 +31,6 @@ export const data = new SlashCommandBuilder()
 // On Interaction Event
 export async function run(interaction: CommandInteraction) {
   //Grab State
-  const now = moment();
   const user = interaction.user;
   var title = interaction.options.getString("title") || undefined;
   if (!title || title.length > 256) title = undefined;

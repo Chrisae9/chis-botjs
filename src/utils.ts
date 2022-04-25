@@ -169,7 +169,7 @@ export function parseTime(input_time: string, ref_timezone: string) {
 
   // Add a Day If Time is Before Now
   if (time) {
-    var user_time = moment.tz(time, "h:m a", ref_timezone);
+    var user_time = moment(time, "h:m a").tz(ref_timezone, true);
     user_time.diff(now) > 0
       ? (time = user_time)
       : (time = user_time.clone().add(1, "days").toISOString());
@@ -182,5 +182,6 @@ export function parseTime(input_time: string, ref_timezone: string) {
         timezone: moment.tz(ref_timezone).zoneAbbr(),
       })
       .toISOString();
+
   return time;
 }
