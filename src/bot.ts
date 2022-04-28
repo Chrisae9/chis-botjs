@@ -97,23 +97,23 @@ client.on("ready", async () => {
   if (!client.application?.owner) await client.application?.fetch();
 
   // Set Role For Server Command
-  client.application?.commands.fetch().then(async (commands) => {
-    commands.forEach(async (command) => {
-      if (command.name == "server") {
-        await client.application?.commands.permissions.set({
-          guild: guildId,
-          command: command.id,
-          permissions: [
-            {
-              id: accessRole,
-              type: "ROLE",
-              permission: true,
-            },
-          ],
-        });
-      }
-    });
-  });
+  // client.application?.commands.fetch().then(async (commands) => {
+  //   commands.forEach(async (command) => {
+  //     if (command.name == "server") {
+  //       await client.application?.commands.permissions.set({
+  //         guild: guildId,
+  //         command: command.id,
+  //         permissions: [
+  //           {
+  //             id: accessRole,
+  //             type: "ROLE",
+  //             permission: true,
+  //           },
+  //         ],
+  //       });
+  //     }
+  //   });
+  // });
 });
 
 // Interaction Event Listener
