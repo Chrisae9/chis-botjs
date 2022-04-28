@@ -86,6 +86,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 // Log into Discord
 client.on("ready", async () => {
   logger.warn(`Logged in as ${client.user?.tag}!`);
+  logger.warn(`Currently in ${client.guilds.cache.size} server(s)`);
 
   // Initial Running Service Check
   await changeStatus(client);
