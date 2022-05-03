@@ -24,7 +24,7 @@ export const data = new SlashCommandBuilder()
       .addChoice("Valheim (PW: jrisawesome)", "valheim")
       .addChoice("Minecraft", "minecraft")
       .addChoice("CS:GO Bhop", "csgo")
-      .addChoice("Satisfactory (Port: 7778)", "satisfactory")
+      .addChoice("Satisfactory", "satisfactory")
   )
   .addStringOption((option) =>
     option
