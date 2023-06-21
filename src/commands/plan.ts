@@ -44,7 +44,7 @@ export async function run(interaction: CommandInteraction) {
   if (spots > 20) {
     spots = 20;
   }
-  var time = interaction.options.getString("time") || undefined;
+  var time: moment.Moment | string | undefined = interaction.options.getString("time") || undefined;
 
   // Establish Connection To Database
   if (!interaction.guild) return;
