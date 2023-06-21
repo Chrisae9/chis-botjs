@@ -36,7 +36,7 @@ export async function run(interaction: CommandInteraction) {
   if (!title || title.length > 256) title = undefined;
   var spots = interaction.options.getInteger("spots") || undefined;
   if (!spots || spots > 20) spots = undefined;
-  var time = interaction.options.getString("time") || undefined;
+  var time: moment.Moment | string | undefined = interaction.options.getString("time") || undefined;
 
   // Establish Connection To Database
   if (!interaction.guild) return;

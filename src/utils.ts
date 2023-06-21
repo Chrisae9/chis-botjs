@@ -23,10 +23,12 @@ export function embed(title: string, spots: number, participants: string[], time
   });
   // embed.setTitle(title + (time ? ` @ <t:${Math.round(new Date(time).getTime() / 1000)}:t>` : ""));
   embed.setTitle(title);
-  if (time) embed.addField(`Event Time`, `<t:${Math.round(new Date(time).getTime() / 1000)}:F>`);
+  if (time) embed.addFields({name: `Event Time`, value: `<t:${Math.round(new Date(time).getTime() / 1000)}:F>`});
 
-  embed.addField(`Participants (${participants.length}/${spots})`, mention);
-  embed.addField(`Slash Commands`, `/join, /leave, /change, /view, /gather`);
+  embed.addFields(
+    {name: `Participants (${participants.length}/${spots})`, value: mention},
+    {name: `Slash Commands`, value: `/join, /leave, /change, /view, /gather`}
+    );
   embed.setTimestamp().setFooter({
     text: "server.chis.dev",
     iconURL:
@@ -162,7 +164,7 @@ export const allowedTimeZones = moment.tz
 
 export function parseTime(input_time: string, ref_timezone: string) {
   const now = moment();
-  var time = undefined;
+  var time: moment.Moment | string | undefined = undefined;
   // Start With user-time Parser
   if (input_time.match(/^\d/))
     time = userTime(input_time, { defaultTimeOfDay: "pm" }).formattedTime;
