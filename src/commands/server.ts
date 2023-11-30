@@ -13,7 +13,7 @@ const guildId = process.env.GUILD_ID!;
 const roleId = process.env.ROLE_ID!;
 
 // Services
-export const services = ["7dtd", "valheim", "minecraft", "csgo", "satisfactory", "minecraft-skyblock"];
+export const services = ["7dtd", "valheim", "minecraft", "csgo", "satisfactory", "minecraft-skyblock", "factorio"];
 
 // Slash Command
 export const data = new SlashCommandBuilder()
@@ -31,7 +31,8 @@ export const data = new SlashCommandBuilder()
         { name: "Minecraft", value: "minecraft" },
         // { name: "Minecraft Skyblock (Port: 25566)", value: "minecraft-skyblock" },
         // { name: "CS:GO Bhop", value: "csgo" },
-        // { name: "Satisfactory", value: "satisfactory" }
+        { name: "Factorio", value: "factorio" },
+        { name: "Satisfactory", value: "satisfactory" },
         )
   )
   .addStringOption((option) =>
