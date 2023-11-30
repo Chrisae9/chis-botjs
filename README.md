@@ -16,12 +16,13 @@ Due to the [instability](https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78
 
 ### Production
 - docker
-- docker-compose V2
 
 Create a `.env-prod` file using [.env-sample](./.sample-env) as a template.
 
 ```bash
-docker-compose up -f docker-compose.prod.yaml
+docker compose -f docker-compose.prod.yaml build
+docker compose -f docker-compose.prod.yaml up
+
 ```
 
 ### Development
